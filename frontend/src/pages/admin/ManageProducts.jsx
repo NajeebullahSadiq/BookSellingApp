@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { adminAPI } from '../../utils/api';
+import InputModal from '../../components/common/InputModal';
 
 const ManageProducts = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState(searchParams.get('status') || '');
-  const [rejectionModal, setRejectionModal] = useState({ show: false, productId: null, reason: '' });
+  const [rejectionModal, setRejectionModal] = useState({ isOpen: false, productId: null });
 
   useEffect(() => {
     fetchProducts();
@@ -37,23 +38,25 @@ const ManageProducts = () => {
     }
   };
 
-  const handleReject = async () => {
-    if (!rejectionModal.reason.trim()) {
-      toast.error('Please provide a reason for rejection');
-      return;
-    }
-
+  const handleReject = async (reason) => {
     try {
       await adminAPI.reviewProduct(rejectionModal.productId, {
         status: 'rejected',
-        rejectionReason: rejectionModal.reason
+        rejectionReason: reason
       });
       toast.success('Product rejected');
-      setRejectionModal({ show: false, productId: null, reason: '' });
       fetchProducts();
     } catch (error) {
       toast.error('Failed to reject product');
     }
+  };
+
+  const openRejectionModal = (productId) => {
+    setRejectionModal({ isOpen: true, productId });
+  };
+
+  const closeRejectionModal = () => {
+    setRejectionModal({ isOpen: false, productId: null });
   };
 
   const handleFilterChange = (newFilter) => {
@@ -114,7 +117,7 @@ const ManageProducts = () => {
                 <div className="flex flex-1">
                   {product.previewImage ? (
                     <img
-                      src={`http://localhost:5000${product.previewImage}`}
+                      src={`${import.meta.env.VITE_API_URL}${product.previewImage}`}
                       alt={product.title}
                       className="w-24 h-24 object-cover rounded mr-4"
                     />
@@ -167,7 +170,7 @@ const ManageProducts = () => {
                         Approve
                       </button>
                       <button
-                        onClick={() => setRejectionModal({ show: true, productId: product._id, reason: '' })}
+                        onClick={() => openRejectionModal(product._id)}
                         className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
                       >
                         Reject
@@ -181,32 +184,18 @@ const ManageProducts = () => {
         </div>
       )}
 
-      {/* Rejection Modal */}
-      {rejectionModal.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">Reject Product</h2>
-            <textarea
-              className="input-field mb-4"
-              rows="4"
-              placeholder="Enter rejection reason..."
-              value={rejectionModal.reason}
-              onChange={(e) => setRejectionModal({ ...rejectionModal, reason: e.target.value })}
-            />
-            <div className="flex space-x-2">
-              <button onClick={handleReject} className="btn-primary flex-1">
-                Reject
-              </button>
-              <button
-                onClick={() => setRejectionModal({ show: false, productId: null, reason: '' })}
-                className="btn-secondary flex-1"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <InputModal
+        isOpen={rejectionModal.isOpen}
+        onClose={closeRejectionModal}
+        onConfirm={handleReject}
+        title="Reject Product"
+        message="Please provide a reason for rejecting this product:"
+        placeholder="Enter rejection reason..."
+        confirmText="Reject"
+        cancelText="Cancel"
+        type="danger"
+        required={true}
+      />
     </div>
   );
 };

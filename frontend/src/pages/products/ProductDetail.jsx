@@ -77,7 +77,7 @@ const ProductDetail = () => {
         <div>
           {currentProduct.previewImage ? (
             <img
-              src={`http://localhost:5000${currentProduct.previewImage}`}
+              src={`${import.meta.env.VITE_API_URL}${currentProduct.previewImage}`}
               alt={currentProduct.title}
               className="w-full rounded-lg shadow-lg"
             />

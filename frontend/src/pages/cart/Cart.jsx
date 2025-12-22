@@ -73,7 +73,7 @@ const Cart = () => {
             <div key={item._id} className="card flex items-center">
               {item.previewImage ? (
                 <img
-                  src={`http://localhost:5000${item.previewImage}`}
+                  src={`${import.meta.env.VITE_API_URL}${item.previewImage}`}
                   alt={item.title}
                   className="w-24 h-24 object-cover rounded mr-4"
                 />

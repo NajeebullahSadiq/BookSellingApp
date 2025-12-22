@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { productAPI } from '../../utils/api';
+import ConfirmModal from '../../components/common/ConfirmModal';
 
 const MyProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, productId: null, productTitle: '' });
 
   useEffect(() => {
     fetchProducts();
@@ -22,16 +24,22 @@ const MyProducts = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return;
-
+  const handleDelete = async () => {
     try {
-      await productAPI.delete(id);
+      await productAPI.delete(deleteModal.productId);
       toast.success('Product deleted');
       fetchProducts();
     } catch (error) {
       toast.error('Failed to delete product');
     }
+  };
+
+  const openDeleteModal = (productId, productTitle) => {
+    setDeleteModal({ isOpen: true, productId, productTitle });
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModal({ isOpen: false, productId: null, productTitle: '' });
   };
 
   if (loading) {
@@ -63,7 +71,7 @@ const MyProducts = () => {
                 <div className="flex flex-1">
                   {product.previewImage ? (
                     <img
-                      src={`http://localhost:5000${product.previewImage}`}
+                      src={`${import.meta.env.VITE_API_URL}${product.previewImage}`}
                       alt={product.title}
                       className="w-24 h-24 object-cover rounded mr-4"
                     />
@@ -112,8 +120,14 @@ const MyProducts = () => {
                   >
                     View
                   </Link>
+                  <Link
+                    to={`/seller/edit-product/${product._id}`}
+                    className="btn-primary text-sm text-center"
+                  >
+                    Edit
+                  </Link>
                   <button
-                    onClick={() => handleDelete(product._id)}
+                    onClick={() => openDeleteModal(product._id, product.title)}
                     className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
                   >
                     Delete
@@ -124,6 +138,17 @@ const MyProducts = () => {
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleDelete}
+        title="Delete Product"
+        message={`Are you sure you want to delete "${deleteModal.productTitle}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 };

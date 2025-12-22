@@ -13,6 +13,7 @@ const { protect, authorize, checkSellerApproval } = require('../middleware/auth'
 const { uploadProductWithImage } = require('../middleware/upload');
 
 router.get('/', getProducts);
+router.get('/seller/my-products', protect, authorize('seller'), getSellerProducts);
 router.get('/:id', getProductById);
 router.get('/:id/download', protect, downloadProduct);
 
@@ -30,6 +31,5 @@ router.post(
 
 router.put('/:id', protect, authorize('seller', 'admin'), updateProduct);
 router.delete('/:id', protect, authorize('seller', 'admin'), deleteProduct);
-router.get('/seller/my-products', protect, authorize('seller'), getSellerProducts);
 
 module.exports = router;

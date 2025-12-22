@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { adminAPI } from '../../utils/api';
+import ConfirmModal from '../../components/common/ConfirmModal';
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, userId: null, userName: '' });
 
   useEffect(() => {
     fetchUsers();
@@ -31,16 +33,22 @@ const ManageUsers = () => {
     }
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
-
+  const handleDeleteUser = async () => {
     try {
-      await adminAPI.deleteUser(userId);
+      await adminAPI.deleteUser(deleteModal.userId);
       toast.success('User deleted');
       fetchUsers();
     } catch (error) {
       toast.error('Failed to delete user');
     }
+  };
+
+  const openDeleteModal = (userId, userName) => {
+    setDeleteModal({ isOpen: true, userId, userName });
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModal({ isOpen: false, userId: null, userName: '' });
   };
 
   if (loading) {
@@ -115,7 +123,7 @@ const ManageUsers = () => {
                     )}
                     {user.role !== 'admin' && (
                       <button
-                        onClick={() => handleDeleteUser(user._id)}
+                        onClick={() => openDeleteModal(user._id, user.name)}
                         className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
                       >
                         Delete
@@ -128,6 +136,17 @@ const ManageUsers = () => {
           </table>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleDeleteUser}
+        title="Delete User"
+        message={`Are you sure you want to delete ${deleteModal.userName}? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 };

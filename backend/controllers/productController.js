@@ -58,6 +58,8 @@ exports.getProducts = async (req, res) => {
       search,
       minPrice,
       maxPrice,
+      minRating,
+      seller,
       sortBy,
       page = 1,
       limit = 12
@@ -77,9 +79,23 @@ exports.getProducts = async (req, res) => {
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
 
-    // Text search
+    // Rating filter
+    if (minRating) {
+      query.rating = { $gte: Number(minRating) };
+    }
+
+    // Seller filter
+    if (seller) {
+      query.seller = seller;
+    }
+
+    // Text search - use regex for better search functionality
     if (search) {
-      query.$text = { $search: search };
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { tags: { $regex: search, $options: 'i' } }
+      ];
     }
 
     // Sorting
@@ -115,7 +131,7 @@ exports.getProducts = async (req, res) => {
       success: true,
       data: products,
       totalPages: Math.ceil(count / limit),
-      currentPage: page,
+      currentPage: Number(page),
       total: count
     });
   } catch (error) {

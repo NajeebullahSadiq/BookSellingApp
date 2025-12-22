@@ -15,13 +15,12 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleLogin = async (email, password) => {
     setLoading(true);
     dispatch(loginStart());
 
     try {
-      const { data } = await authAPI.login(formData);
+      const { data } = await authAPI.login({ email, password });
       dispatch(loginSuccess({ user: data.data, token: data.data.token }));
       toast.success('Login successful!');
       
@@ -40,6 +39,15 @@ const Login = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await handleLogin(formData.email, formData.password);
+  };
+
+  const handleQuickLogin = (email, password) => {
+    handleLogin(email, password);
   };
 
   return (
@@ -100,6 +108,55 @@ const Login = () => {
             </button>
           </div>
         </form>
+
+        <div className="mt-8">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-gray-50 text-gray-500">Quick Login with Sample Users</span>
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 gap-3">
+            <button
+              onClick={() => handleQuickLogin('admin@bookseller.com', 'admin123')}
+              disabled={loading}
+              className="w-full flex items-center justify-between px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            >
+              <span className="flex items-center">
+                <span className="text-xl mr-3">👨‍💼</span>
+                <span>Admin User</span>
+              </span>
+              <span className="text-xs text-gray-500">admin@bookseller.com</span>
+            </button>
+
+            <button
+              onClick={() => handleQuickLogin('jane@example.com', 'password123')}
+              disabled={loading}
+              className="w-full flex items-center justify-between px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            >
+              <span className="flex items-center">
+                <span className="text-xl mr-3">🏪</span>
+                <span>Seller User</span>
+              </span>
+              <span className="text-xs text-gray-500">jane@example.com</span>
+            </button>
+
+            <button
+              onClick={() => handleQuickLogin('john@example.com', 'password123')}
+              disabled={loading}
+              className="w-full flex items-center justify-between px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            >
+              <span className="flex items-center">
+                <span className="text-xl mr-3">🛍️</span>
+                <span>Customer User</span>
+              </span>
+              <span className="text-xs text-gray-500">john@example.com</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

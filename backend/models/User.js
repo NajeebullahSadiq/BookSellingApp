@@ -34,6 +34,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  wishlist: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product'
+  }],
   // Seller-specific fields
   sellerProfile: {
     bio: String,

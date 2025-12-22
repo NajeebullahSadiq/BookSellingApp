@@ -68,4 +68,13 @@ export const adminAPI = {
   getStats: () => API.get('/admin/stats'),
 };
 
+// Wishlist APIs
+export const wishlistAPI = {
+  getWishlist: () => API.get('/wishlist'),
+  addToWishlist: (productId) => API.post(`/wishlist/${productId}`),
+  removeFromWishlist: (productId) => API.delete(`/wishlist/${productId}`),
+  clearWishlist: () => API.delete('/wishlist'),
+  checkWishlist: (productId) => API.get(`/wishlist/check/${productId}`),
+};
+
 export default API;

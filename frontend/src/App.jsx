@@ -20,6 +20,7 @@ import MyOrders from './pages/orders/MyOrders';
 // Seller Pages
 import SellerDashboard from './pages/seller/SellerDashboard';
 import CreateProduct from './pages/seller/CreateProduct';
+import EditProduct from './pages/seller/EditProduct';
 import MyProducts from './pages/seller/MyProducts';
 
 // Admin Pages
@@ -48,6 +49,7 @@ function App() {
           {/* Seller Routes */}
           <Route path="/seller/dashboard" element={<PrivateRoute role="seller"><SellerDashboard /></PrivateRoute>} />
           <Route path="/seller/create-product" element={<PrivateRoute role="seller"><CreateProduct /></PrivateRoute>} />
+          <Route path="/seller/edit-product/:id" element={<PrivateRoute role="seller"><EditProduct /></PrivateRoute>} />
           <Route path="/seller/products" element={<PrivateRoute role="seller"><MyProducts /></PrivateRoute>} />
 
           {/* Admin Routes */}

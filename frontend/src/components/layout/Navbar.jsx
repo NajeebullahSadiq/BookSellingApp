@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import { useState, useRef, useEffect } from 'react';
 import { logout } from '../../store/slices/authSlice';
 
 const Navbar = () => {
@@ -7,6 +8,24 @@ const Navbar = () => {
   const { items } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    if (isUserMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isUserMenuOpen]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -62,21 +81,26 @@ const Navbar = () => {
                   </Link>
                 )}
 
-                <div className="relative group">
-                  <button className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 px-3 py-2">
+                <div className="relative" ref={menuRef}>
+                  <button 
+                    className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 px-3 py-2"
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  >
                     <span>👤 {user?.name}</span>
                   </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block z-10">
-                    <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      Profile
-                    </Link>
-                    <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      My Orders
-                    </Link>
-                    <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      Logout
-                    </button>
-                  </div>
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                      <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        Profile
+                      </Link>
+                      <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        My Orders
+                      </Link>
+                      <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        Logout
+                      </button>
+                    </div>
+                  )}
                 </div>
               </>
             )}
