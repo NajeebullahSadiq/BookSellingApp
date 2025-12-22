@@ -5,7 +5,8 @@ import { removeFromCart, clearCart } from '../../store/slices/cartSlice';
 import { orderAPI } from '../../utils/api';
 import { loadStripe } from '@stripe/stripe-js';
 
-const stripePromise = loadStripe('your_stripe_publishable_key_here');
+// Load Stripe with publishable key from environment variable
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_mockkey');
 
 const Cart = () => {
   const { items, total } = useSelector((state) => state.cart);
@@ -23,6 +24,15 @@ const Cart = () => {
         items: items.map(item => ({ productId: item._id }))
       });
 
+      // Check if this is a mock payment (will have redirectUrl)
+      if (data.isMockPayment && data.redirectUrl) {
+        console.log('Mock payment detected - redirecting to success page');
+        // For mock payments, redirect directly to the success page
+        window.location.href = data.redirectUrl;
+        return;
+      }
+
+      // Regular Stripe checkout flow
       const stripe = await stripePromise;
       const { error } = await stripe.redirectToCheckout({
         sessionId: data.sessionId
@@ -32,7 +42,11 @@ const Cart = () => {
         toast.error(error.message);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Checkout failed');
+      console.error('Checkout error:', error);
+      toast.error(
+        error.response?.data?.message || 
+        'Checkout failed. Please try again.'
+      );
     }
   };
 
