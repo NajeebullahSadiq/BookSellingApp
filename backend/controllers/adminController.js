@@ -1,14 +1,30 @@
 const User = require('../models/User');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
+const { createNotification } = require('./notificationController');
 
 // @desc    Get all users
 // @route   GET /api/admin/users
 // @access  Private (Admin)
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().sort({ createdAt: -1 });
-    res.status(200).json({ success: true, data: users, count: users.length });
+    const { page = 1, limit = 20 } = req.query;
+
+    const users = await User.find()
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .exec();
+
+    const count = await User.countDocuments();
+
+    res.status(200).json({
+      success: true,
+      data: users,
+      totalPages: Math.ceil(count / limit),
+      currentPage: Number(page),
+      total: count
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -58,10 +74,25 @@ exports.deleteUser = async (req, res) => {
 // @access  Private (Admin)
 exports.getAllProducts = async (req, res) => {
   try {
-    const { status } = req.query;
+    const { status, page = 1, limit = 20 } = req.query;
     const query = status ? { status } : {};
-    const products = await Product.find(query).populate('seller', 'name email').sort({ createdAt: -1 });
-    res.status(200).json({ success: true, data: products, count: products.length });
+
+    const products = await Product.find(query)
+      .populate('seller', 'name email')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .exec();
+
+    const count = await Product.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      data: products,
+      totalPages: Math.ceil(count / limit),
+      currentPage: Number(page),
+      total: count
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -89,6 +120,25 @@ exports.reviewProduct = async (req, res) => {
     }
 
     await product.save();
+
+    if (status === 'approved') {
+      await createNotification(product.seller, {
+        type: 'product_approved',
+        title: 'Product Approved! 🎉',
+        message: `Your product "${product.title}" has been approved and is now live!`,
+        link: '/seller/products',
+        relatedProduct: product._id
+      });
+    } else if (status === 'rejected') {
+      await createNotification(product.seller, {
+        type: 'product_rejected',
+        title: 'Product Rejected',
+        message: `Your product "${product.title}" was rejected. Reason: ${product.rejectionReason}`,
+        link: '/seller/products',
+        relatedProduct: product._id
+      });
+    }
+
     res.status(200).json({ success: true, data: product });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

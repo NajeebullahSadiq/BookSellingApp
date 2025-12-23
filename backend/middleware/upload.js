@@ -4,7 +4,7 @@ const fs = require('fs');
 
 // Create uploads directory if it doesn't exist
 const createUploadDirs = () => {
-  const dirs = ['./uploads/products', './uploads/images', './uploads/profiles'];
+  const dirs = ['./uploads/products', './uploads/images', './uploads/profiles', './uploads/previews'];
   dirs.forEach(dir => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
@@ -83,19 +83,30 @@ exports.uploadProductWithImage = multer({
         cb(null, './uploads/products');
       } else if (file.fieldname === 'previewImage') {
         cb(null, './uploads/images');
+      } else if (file.fieldname === 'previewPages') {
+        cb(null, './uploads/previews');
       }
     },
     filename: function (req, file, cb) {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      const prefix = file.fieldname === 'file' ? 'product-' : 'image-';
+      let prefix = 'file-';
+      if (file.fieldname === 'file') {
+        prefix = 'product-';
+      } else if (file.fieldname === 'previewImage') {
+        prefix = 'image-';
+      } else if (file.fieldname === 'previewPages') {
+        prefix = 'preview-';
+      }
       cb(null, prefix + uniqueSuffix + path.extname(file.originalname));
     }
   }),
   fileFilter: function (req, file, cb) {
     if (file.fieldname === 'file') {
       productFileFilter(req, file, cb);
-    } else if (file.fieldname === 'previewImage') {
+    } else if (file.fieldname === 'previewImage' || file.fieldname === 'previewPages') {
       imageFileFilter(req, file, cb);
+    } else {
+      cb(new Error('Invalid field name'));
     }
   },
   limits: { fileSize: 50 * 1024 * 1024 }

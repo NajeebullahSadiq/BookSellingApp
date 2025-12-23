@@ -15,6 +15,7 @@ const CreateProduct = () => {
   });
   const [file, setFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [previewPages, setPreviewPages] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -43,6 +44,15 @@ const CreateProduct = () => {
     setPreviewImage(e.target.files[0]);
   };
 
+  const handlePreviewPagesChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 5) {
+      toast.error('You can upload a maximum of 5 preview pages');
+      return;
+    }
+    setPreviewPages(files);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -63,6 +73,11 @@ const CreateProduct = () => {
     data.append('file', file);
     if (previewImage) {
       data.append('previewImage', previewImage);
+    }
+    if (previewPages.length > 0) {
+      previewPages.forEach((page) => {
+        data.append('previewPages', page);
+      });
     }
 
     try {
@@ -186,6 +201,25 @@ const CreateProduct = () => {
               accept="image/*"
             />
             <p className="text-sm text-gray-500 mt-1">Max size: 5MB</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Preview Pages (Optional)</label>
+            <input
+              type="file"
+              multiple
+              onChange={handlePreviewPagesChange}
+              className="input-field"
+              accept="image/*"
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Upload up to 5 sample pages for customers to preview before purchase. Max size: 5MB each
+            </p>
+            {previewPages.length > 0 && (
+              <p className="text-sm text-green-600 mt-1">
+                {previewPages.length} file(s) selected
+              </p>
+            )}
           </div>
 
           <div className="border-t pt-6">

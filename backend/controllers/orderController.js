@@ -2,6 +2,7 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const User = require('../models/User');
 const Stripe = require('stripe');
+const { createNotification } = require('./notificationController');
 // Initialize Stripe only if we're not in mock mode
 const stripe = process.env.USE_MOCK_PAYMENTS === 'true' ? null : Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock');
 
@@ -40,11 +41,28 @@ exports.createCheckoutSession = async (req, res) => {
         stripePaymentId: mockSessionId
       });
 
-      // Update seller stats
+      // Update seller stats and create notifications
       for (const item of order.items) {
         await Product.findByIdAndUpdate(item.product, { $inc: { downloads: 0 } });
         await User.findByIdAndUpdate(item.seller, { $inc: { 'sellerProfile.totalSales': 1, 'sellerProfile.earnings': item.price } });
+        
+        await createNotification(item.seller, {
+          type: 'order',
+          title: 'New Sale!',
+          message: `You made a sale! "${item.title}" was purchased.`,
+          link: '/seller/products',
+          relatedProduct: item.product,
+          relatedOrder: order._id
+        });
       }
+
+      await createNotification(req.user._id, {
+        type: 'order',
+        title: 'Order Completed',
+        message: `Your order of ${order.items.length} item(s) has been completed successfully!`,
+        link: '/orders',
+        relatedOrder: order._id
+      });
 
       return res.status(200).json({ 
         success: true, 
@@ -133,11 +151,28 @@ exports.stripeWebhook = async (req, res) => {
         order.completedAt = new Date();
         await order.save();
 
-        // Increment seller stats
+        // Increment seller stats and create notifications
         for (const item of order.items) {
           await Product.findByIdAndUpdate(item.product, { $inc: { downloads: 0 } });
           await User.findByIdAndUpdate(item.seller, { $inc: { 'sellerProfile.totalSales': 1, 'sellerProfile.earnings': item.price } });
+          
+          await createNotification(item.seller, {
+            type: 'order',
+            title: 'New Sale!',
+            message: `You made a sale! "${item.title}" was purchased.`,
+            link: '/seller/products',
+            relatedProduct: item.product,
+            relatedOrder: order._id
+          });
         }
+
+        await createNotification(order.customer, {
+          type: 'order',
+          title: 'Order Completed',
+          message: `Your order of ${order.items.length} item(s) has been completed successfully!`,
+          link: '/orders',
+          relatedOrder: order._id
+        });
       }
     }
 
@@ -152,8 +187,23 @@ exports.stripeWebhook = async (req, res) => {
 // @access  Private (Customer)
 exports.getMyOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ customer: req.user._id }).sort({ createdAt: -1 });
-    res.status(200).json({ success: true, data: orders });
+    const { page = 1, limit = 10 } = req.query;
+
+    const orders = await Order.find({ customer: req.user._id })
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .exec();
+
+    const count = await Order.countDocuments({ customer: req.user._id });
+
+    res.status(200).json({
+      success: true,
+      data: orders,
+      totalPages: Math.ceil(count / limit),
+      currentPage: Number(page),
+      total: count
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

@@ -10,6 +10,8 @@ import PrivateRoute from './components/routing/PrivateRoute';
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 import Products from './pages/products/Products';
 import ProductDetail from './pages/products/ProductDetail';
 import Cart from './pages/cart/Cart';
@@ -17,6 +19,7 @@ import CheckoutSuccess from './pages/checkout/CheckoutSuccess';
 import Profile from './pages/profile/Profile';
 import MyOrders from './pages/orders/MyOrders';
 import Wishlist from './pages/wishlist/Wishlist';
+import Notifications from './pages/notifications/Notifications';
 
 // Seller Pages
 import SellerDashboard from './pages/seller/SellerDashboard';
@@ -38,6 +41,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:resetToken" element={<ResetPassword />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
@@ -47,6 +52,7 @@ function App() {
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/orders" element={<PrivateRoute><MyOrders /></PrivateRoute>} />
           <Route path="/wishlist" element={<PrivateRoute><Wishlist /></PrivateRoute>} />
+          <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
 
           {/* Seller Routes */}
           <Route path="/seller/dashboard" element={<PrivateRoute role="seller"><SellerDashboard /></PrivateRoute>} />

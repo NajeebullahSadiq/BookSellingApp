@@ -24,7 +24,8 @@ router.post(
   checkSellerApproval,
   uploadProductWithImage.fields([
     { name: 'file', maxCount: 1 },
-    { name: 'previewImage', maxCount: 1 }
+    { name: 'previewImage', maxCount: 1 },
+    { name: 'previewPages', maxCount: 5 }
   ]),
   createProduct
 );

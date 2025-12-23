@@ -6,6 +6,7 @@ import { setCurrentProduct } from '../../store/slices/productSlice';
 import { addToCart } from '../../store/slices/cartSlice';
 import { productAPI, reviewAPI } from '../../utils/api';
 import WishlistButton from '../../components/common/WishlistButton';
+import ProductPreview from '../../components/common/ProductPreview';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -132,11 +133,16 @@ const ProductDetail = () => {
             </div>
           )}
 
-          <div className="flex gap-3">
-            <button onClick={handleAddToCart} className="btn-primary flex-1 text-lg py-3">
-              Add to Cart
-            </button>
-            <WishlistButton productId={currentProduct._id} size="lg" />
+          <div className="flex flex-col gap-3">
+            {currentProduct.previewPages && currentProduct.previewPages.length > 0 && (
+              <ProductPreview previewPages={currentProduct.previewPages} />
+            )}
+            <div className="flex gap-3">
+              <button onClick={handleAddToCart} className="btn-primary flex-1 text-lg py-3">
+                Add to Cart
+              </button>
+              <WishlistButton productId={currentProduct._id} size="lg" />
+            </div>
           </div>
         </div>
       </div>

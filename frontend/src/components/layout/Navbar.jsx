@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { logout } from '../../store/slices/authSlice';
 import { setWishlist } from '../../store/slices/wishlistSlice';
 import { wishlistAPI } from '../../utils/api';
+import NotificationBell from '../common/NotificationBell';
 
 const Navbar = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
@@ -96,6 +97,8 @@ const Navbar = () => {
                   )}
                 </Link>
 
+                <NotificationBell />
+
                 {user?.role === 'seller' && (
                   <Link to="/seller/dashboard" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
                     Seller Dashboard
@@ -122,6 +125,9 @@ const Navbar = () => {
                       </Link>
                       <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         My Orders
+                      </Link>
+                      <Link to="/notifications" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        Notifications
                       </Link>
                       <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         Logout

@@ -19,6 +19,7 @@ exports.createProduct = async (req, res) => {
 
     const file = req.files.file[0];
     const previewImage = req.files.previewImage ? req.files.previewImage[0] : null;
+    const previewPages = req.files.previewPages || [];
 
     const product = await Product.create({
       title,
@@ -33,6 +34,8 @@ exports.createProduct = async (req, res) => {
       fileSize: file.size,
       fileType: file.mimetype,
       previewImage: previewImage ? `/uploads/images/${previewImage.filename}` : null,
+      previewPages: previewPages.map(page => `/uploads/previews/${page.filename}`),
+      previewPagesCount: previewPages.length,
       status: 'pending'
     });
 
@@ -259,6 +262,15 @@ exports.deleteProduct = async (req, res) => {
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
       }
+    }
+
+    if (product.previewPages && product.previewPages.length > 0) {
+      product.previewPages.forEach(previewPage => {
+        const previewPath = path.join(__dirname, '..', previewPage);
+        if (fs.existsSync(previewPath)) {
+          fs.unlinkSync(previewPath);
+        }
+      });
     }
 
     await product.deleteOne();

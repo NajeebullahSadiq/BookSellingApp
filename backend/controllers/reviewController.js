@@ -47,11 +47,24 @@ exports.createReview = async (req, res) => {
 // @access  Public
 exports.getProductReviews = async (req, res) => {
   try {
+    const { page = 1, limit = 10 } = req.query;
+
     const reviews = await Review.find({ product: req.params.productId })
       .populate('user', 'name profileImage')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .exec();
 
-    res.status(200).json({ success: true, data: reviews, count: reviews.length });
+    const count = await Review.countDocuments({ product: req.params.productId });
+
+    res.status(200).json({
+      success: true,
+      data: reviews,
+      totalPages: Math.ceil(count / limit),
+      currentPage: Number(page),
+      total: count
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

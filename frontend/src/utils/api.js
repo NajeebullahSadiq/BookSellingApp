@@ -23,6 +23,8 @@ export const authAPI = {
   getMe: () => API.get('/auth/me'),
   updateProfile: (data) => API.put('/auth/profile', data),
   updateSellerProfile: (data) => API.put('/auth/seller-profile', data),
+  forgotPassword: (data) => API.post('/auth/forgot-password', data),
+  resetPassword: (token, data) => API.put(`/auth/reset-password/${token}`, data),
 };
 
 // Product APIs
@@ -75,6 +77,15 @@ export const wishlistAPI = {
   removeFromWishlist: (productId) => API.delete(`/wishlist/${productId}`),
   clearWishlist: () => API.delete('/wishlist'),
   checkWishlist: (productId) => API.get(`/wishlist/check/${productId}`),
+};
+
+// Notification APIs
+export const notificationAPI = {
+  getNotifications: (params) => API.get('/notifications', { params }),
+  getUnreadCount: () => API.get('/notifications/unread-count'),
+  markAsRead: (id) => API.put(`/notifications/${id}/mark-read`),
+  markAllAsRead: () => API.put('/notifications/mark-all-read'),
+  deleteNotification: (id) => API.delete(`/notifications/${id}`),
 };
 
 export default API;

@@ -1,25 +1,25 @@
 High Priority
-Search & Advanced Filters - By title, category, price range, rating, seller
-Wishlist/Favorites - Save products for later
-Password Reset - Forgot password email flow
-Email Verification - Verify user emails on registration
-Pagination - For products, orders, reviews lists
-Product Preview - Sample pages/preview before purchase
-Notifications System - For orders, product approvals, messages
-Seller Analytics - Charts for sales, revenue trends, top products
+1. Search & Advanced Filters - By title, category, price range, rating, seller
+2. Wishlist/Favorites - Save products for later
+3. Password Reset - Forgot password email flow
+4. Email Verification - Verify user emails on registration
+5. Pagination - For products, orders, reviews lists
+6. Product Preview - Sample pages/preview before purchase
+7. Notifications System - For orders, product approvals, messages
+8. Seller Analytics - Charts for sales, revenue trends, top products 
 Medium Priority
-Messaging System - Customer-seller communication
-Report/Flag Content - Report inappropriate products/reviews
-Refund Requests - Handle refunds and disputes
-Seller Verification Badge - Trust indicators
-Product Recommendations - Based on browsing/purchase history
-Social Sharing - Share products on social media
-Bulk Upload - Upload multiple products at once (sellers)
-Download History - Track all downloaded files
-Rating Breakdown - Show 5⭐, 4⭐, etc. distribution
+9. Messaging System - Customer-seller communication
+10. Report/Flag Content - Report inappropriate products/reviews
+11. Refund Requests - Handle refunds and disputes
+12. Seller Verification Badge - Trust indicators
+13. Product Recommendations - Based on browsing/purchase history
+14. Social Sharing - Share products on social media
+15. Bulk Upload - Upload multiple products at once (sellers)
+16. Download History - Track all downloaded files
+17. Rating Breakdown - Show 5⭐, 4⭐, etc. distribution
 Low Priority
-Dark Mode - Theme toggle
-Multi-language Support - i18n
-Mobile App - React Native version
-Blog/Resources Section - SEO and content marketing
-Affiliate Program - Earn commissions
+18. Dark Mode - Theme toggle
+19. Multi-language Support - i18n
+20. Mobile App - React Native version
+21. Blog/Resources Section - SEO and content marketing
+22. Affiliate Program - Earn commissions

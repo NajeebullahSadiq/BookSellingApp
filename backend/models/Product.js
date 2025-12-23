@@ -57,6 +57,14 @@ const productSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  // Preview pages (for sample viewing before purchase)
+  previewPages: [{
+    type: String
+  }],
+  previewPagesCount: {
+    type: Number,
+    default: 0
+  },
   // Product stats
   downloads: {
     type: Number,
