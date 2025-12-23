@@ -2,10 +2,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useState, useRef, useEffect } from 'react';
 import { logout } from '../../store/slices/authSlice';
+import { setWishlist } from '../../store/slices/wishlistSlice';
+import { wishlistAPI } from '../../utils/api';
 
 const Navbar = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { items } = useSelector((state) => state.cart);
+  const { items: wishlistItems } = useSelector((state) => state.wishlist);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -26,6 +29,21 @@ const Navbar = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isUserMenuOpen]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchWishlist();
+    }
+  }, [isAuthenticated]);
+
+  const fetchWishlist = async () => {
+    try {
+      const { data } = await wishlistAPI.getWishlist();
+      dispatch(setWishlist(data.data));
+    } catch (error) {
+      console.error('Failed to fetch wishlist');
+    }
+  };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -60,6 +78,15 @@ const Navbar = () => {
               </>
             ) : (
               <>
+                <Link to="/wishlist" className="relative text-gray-700 hover:text-blue-600 px-3 py-2">
+                  ❤️ Wishlist
+                  {wishlistItems.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {wishlistItems.length}
+                    </span>
+                  )}
+                </Link>
+
                 <Link to="/cart" className="relative text-gray-700 hover:text-blue-600 px-3 py-2">
                   🛒 Cart
                   {items.length > 0 && (

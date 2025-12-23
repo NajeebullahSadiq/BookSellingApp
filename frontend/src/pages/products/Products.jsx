@@ -7,6 +7,7 @@ import { addToCart } from '../../store/slices/cartSlice';
 import { productAPI, categoryAPI } from '../../utils/api';
 import SearchBar from '../../components/common/SearchBar';
 import AdvancedFilters from '../../components/common/AdvancedFilters';
+import WishlistButton from '../../components/common/WishlistButton';
 
 const Products = () => {
   const [categories, setCategories] = useState([]);
@@ -167,8 +168,12 @@ const Products = () => {
               {products.map((product) => (
                 <div
                   key={product._id}
-                  className="card hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                  className="card hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative"
                 >
+                  <div className="absolute top-2 right-2 z-10">
+                    <WishlistButton productId={product._id} size="md" />
+                  </div>
+
                   <Link to={`/products/${product._id}`}>
                     {product.previewImage ? (
                       <img

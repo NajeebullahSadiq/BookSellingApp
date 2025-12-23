@@ -16,6 +16,7 @@ import Cart from './pages/cart/Cart';
 import CheckoutSuccess from './pages/checkout/CheckoutSuccess';
 import Profile from './pages/profile/Profile';
 import MyOrders from './pages/orders/MyOrders';
+import Wishlist from './pages/wishlist/Wishlist';
 
 // Seller Pages
 import SellerDashboard from './pages/seller/SellerDashboard';
@@ -45,6 +46,7 @@ function App() {
           {/* Protected Routes */}
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/orders" element={<PrivateRoute><MyOrders /></PrivateRoute>} />
+          <Route path="/wishlist" element={<PrivateRoute><Wishlist /></PrivateRoute>} />
 
           {/* Seller Routes */}
           <Route path="/seller/dashboard" element={<PrivateRoute role="seller"><SellerDashboard /></PrivateRoute>} />

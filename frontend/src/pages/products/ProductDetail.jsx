@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { setCurrentProduct } from '../../store/slices/productSlice';
 import { addToCart } from '../../store/slices/cartSlice';
 import { productAPI, reviewAPI } from '../../utils/api';
+import WishlistButton from '../../components/common/WishlistButton';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -131,9 +132,12 @@ const ProductDetail = () => {
             </div>
           )}
 
-          <button onClick={handleAddToCart} className="btn-primary w-full text-lg py-3">
-            Add to Cart
-          </button>
+          <div className="flex gap-3">
+            <button onClick={handleAddToCart} className="btn-primary flex-1 text-lg py-3">
+              Add to Cart
+            </button>
+            <WishlistButton productId={currentProduct._id} size="lg" />
+          </div>
         </div>
       </div>
 
