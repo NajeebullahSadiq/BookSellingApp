@@ -9,6 +9,7 @@ import WishlistButton from '../../components/common/WishlistButton';
 import ProductPreview from '../../components/common/ProductPreview';
 import MessageButton from '../../components/common/MessageButton';
 import ReportModal from '../../components/common/ReportModal';
+import VerificationBadge from '../../components/common/VerificationBadge';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -143,9 +144,11 @@ const ProductDetail = () => {
             <p className="text-sm text-gray-600">
               <span className="font-semibold">Category:</span> {currentProduct.category?.name}
             </p>
-            <p className="text-sm text-gray-600">
-              <span className="font-semibold">Seller:</span> {currentProduct.seller?.name}
-            </p>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span className="font-semibold">Seller:</span> 
+              <span>{currentProduct.seller?.name}</span>
+              <VerificationBadge seller={currentProduct.seller} size="sm" />
+            </div>
             <p className="text-sm text-gray-600">
               <span className="font-semibold">File Type:</span> {currentProduct.fileType}
             </p>

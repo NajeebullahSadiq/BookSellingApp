@@ -8,6 +8,7 @@ import { productAPI, categoryAPI } from '../../utils/api';
 import SearchBar from '../../components/common/SearchBar';
 import AdvancedFilters from '../../components/common/AdvancedFilters';
 import WishlistButton from '../../components/common/WishlistButton';
+import VerificationBadge from '../../components/common/VerificationBadge';
 
 const Products = () => {
   const [categories, setCategories] = useState([]);
@@ -199,9 +200,12 @@ const Products = () => {
                   </p>
 
                   <div className="mb-3">
-                    <p className="text-xs text-gray-500 mb-1">
-                      by {product.seller?.name || 'Unknown'}
-                    </p>
+                    <div className="flex items-center gap-1 mb-1">
+                      <p className="text-xs text-gray-500">
+                        by {product.seller?.name || 'Unknown'}
+                      </p>
+                      <VerificationBadge seller={product.seller} size="xs" />
+                    </div>
                     <div className="flex items-center justify-between">
                       <span className="text-2xl font-bold text-blue-600">
                         ${product.price.toFixed(2)}

@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { updateUser } from '../../store/slices/authSlice';
 import { authAPI } from '../../utils/api';
+import VerificationBadge from '../../components/common/VerificationBadge';
 
 const Profile = () => {
   const { user } = useSelector((state) => state.auth);
@@ -118,12 +119,29 @@ const Profile = () => {
       {/* Seller Profile (if user is a seller) */}
       {user?.role === 'seller' && (
         <div className="card">
-          <h2 className="text-xl font-semibold mb-4">Seller Information</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Seller Information</h2>
+            {user.sellerProfile?.isVerified && (
+              <VerificationBadge seller={user} size="md" showLabel />
+            )}
+          </div>
           
           {!user.sellerProfile?.isApproved && (
             <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-4">
               <p className="text-yellow-700">
                 ⚠️ Your seller account is pending admin approval. You won't be able to create products until approved.
+              </p>
+            </div>
+          )}
+
+          {user.sellerProfile?.isVerified && (
+            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+              <p className="text-blue-700 flex items-center gap-2">
+                <span className="text-lg">✓</span>
+                <span>
+                  You are a <strong>{user.sellerProfile.verificationLevel}</strong> verified seller! 
+                  This badge helps build trust with customers.
+                </span>
               </p>
             </div>
           )}

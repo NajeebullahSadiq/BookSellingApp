@@ -57,6 +57,18 @@ const userSchema = new mongoose.Schema({
     isApproved: {
       type: Boolean,
       default: false
+    },
+    isVerified: {
+      type: Boolean,
+      default: false
+    },
+    verificationLevel: {
+      type: String,
+      enum: ['none', 'basic', 'trusted', 'premium'],
+      default: 'none'
+    },
+    verifiedAt: {
+      type: Date
     }
   },
   resetPasswordToken: String,

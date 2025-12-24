@@ -36,7 +36,7 @@ exports.getAllUsers = async (req, res) => {
 // @access  Private (Admin)
 exports.updateUser = async (req, res) => {
   try {
-    const { role, sellerApproved } = req.body;
+    const { role, sellerApproved, sellerVerified, verificationLevel } = req.body;
     const user = await User.findById(req.params.id);
 
     if (!user) {
@@ -46,6 +46,16 @@ exports.updateUser = async (req, res) => {
     if (role) user.role = role;
     if (sellerApproved !== undefined && user.role === 'seller') {
       user.sellerProfile.isApproved = sellerApproved;
+    }
+    if (sellerVerified !== undefined && user.role === 'seller') {
+      user.sellerProfile.isVerified = sellerVerified;
+      if (sellerVerified) {
+        user.sellerProfile.verificationLevel = verificationLevel || 'basic';
+        user.sellerProfile.verifiedAt = Date.now();
+      } else {
+        user.sellerProfile.verificationLevel = 'none';
+        user.sellerProfile.verifiedAt = null;
+      }
     }
 
     await user.save();
