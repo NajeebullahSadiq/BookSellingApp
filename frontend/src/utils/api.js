@@ -88,4 +88,34 @@ export const notificationAPI = {
   deleteNotification: (id) => API.delete(`/notifications/${id}`),
 };
 
+// Seller Analytics APIs
+export const sellerAPI = {
+  getStats: () => API.get('/seller/stats'),
+  getRevenueTrends: (params) => API.get('/seller/revenue-trends', { params }),
+  getTopProducts: (params) => API.get('/seller/top-products', { params }),
+  getRecentSales: (params) => API.get('/seller/recent-sales', { params }),
+};
+
+// Message APIs
+export const messageAPI = {
+  getConversations: (params) => API.get('/messages/conversations', { params }),
+  getConversation: (id) => API.get(`/messages/conversations/${id}`),
+  getMessages: (conversationId, params) => API.get(`/messages/conversations/${conversationId}/messages`, { params }),
+  sendMessage: (data) => API.post('/messages/send', data),
+  markAsRead: (conversationId) => API.put(`/messages/conversations/${conversationId}/mark-read`),
+  deleteConversation: (id) => API.delete(`/messages/conversations/${id}`),
+  getUnreadCount: () => API.get('/messages/unread-count'),
+};
+
+// Report APIs
+export const reportAPI = {
+  create: (data) => API.post('/reports', data),
+  getAll: (params) => API.get('/reports', { params }),
+  getById: (id) => API.get(`/reports/${id}`),
+  updateStatus: (id, data) => API.put(`/reports/${id}`, data),
+  delete: (id) => API.delete(`/reports/${id}`),
+  getMyReports: () => API.get('/reports/my-reports'),
+  getStats: () => API.get('/reports/stats'),
+};
+
 export default API;

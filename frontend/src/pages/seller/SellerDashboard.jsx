@@ -47,12 +47,15 @@ const SellerDashboard = () => {
       {/* Quick Actions */}
       <div className="card">
         <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link to="/seller/create-product" className="btn-primary text-center">
             ➕ Create New Product
           </Link>
           <Link to="/seller/products" className="btn-secondary text-center">
             📦 Manage My Products
+          </Link>
+          <Link to="/seller/analytics" className="btn-secondary text-center">
+            📊 View Analytics
           </Link>
         </div>
       </div>

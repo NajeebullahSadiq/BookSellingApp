@@ -4,15 +4,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { setCurrentProduct } from '../../store/slices/productSlice';
 import { addToCart } from '../../store/slices/cartSlice';
-import { productAPI, reviewAPI } from '../../utils/api';
+import { productAPI, reviewAPI, reportAPI } from '../../utils/api';
 import WishlistButton from '../../components/common/WishlistButton';
 import ProductPreview from '../../components/common/ProductPreview';
+import MessageButton from '../../components/common/MessageButton';
+import ReportModal from '../../components/common/ReportModal';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const [reviews, setReviews] = useState([]);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [loading, setLoading] = useState(true);
+  const [reportModal, setReportModal] = useState({ isOpen: false, type: '', itemId: '' });
 
   const dispatch = useDispatch();
   const { currentProduct } = useSelector((state) => state.products);
@@ -64,6 +67,27 @@ const ProductDetail = () => {
     }
   };
 
+  const handleReportSubmit = async (reportData) => {
+    try {
+      await reportAPI.create(reportData);
+      toast.success('Report submitted successfully!');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to submit report');
+    }
+  };
+
+  const openReportModal = (type, itemId) => {
+    if (!isAuthenticated) {
+      toast.error('Please login to report content');
+      return;
+    }
+    setReportModal({ isOpen: true, type, itemId });
+  };
+
+  const closeReportModal = () => {
+    setReportModal({ isOpen: false, type: '', itemId: '' });
+  };
+
   if (loading) {
     return <div className="max-w-7xl mx-auto px-4 py-12 text-center">Loading...</div>;
   }
@@ -92,7 +116,16 @@ const ProductDetail = () => {
 
         {/* Product Info */}
         <div>
-          <h1 className="text-3xl font-bold mb-4">{currentProduct.title}</h1>
+          <div className="flex justify-between items-start mb-4">
+            <h1 className="text-3xl font-bold">{currentProduct.title}</h1>
+            <button
+              onClick={() => openReportModal('product', currentProduct._id)}
+              className="text-red-500 hover:text-red-700 text-sm flex items-center"
+              title="Report this product"
+            >
+              🚩 Report
+            </button>
+          </div>
 
           <div className="flex items-center mb-4">
             <span className="text-yellow-500 text-xl mr-2">⭐ {currentProduct.rating.toFixed(1)}</span>
@@ -143,6 +176,12 @@ const ProductDetail = () => {
               </button>
               <WishlistButton productId={currentProduct._id} size="lg" />
             </div>
+            <MessageButton
+              sellerId={currentProduct.seller?._id}
+              sellerName={currentProduct.seller?.name}
+              productId={currentProduct._id}
+              productTitle={currentProduct.title}
+            />
           </div>
         </div>
       </div>
@@ -188,14 +227,23 @@ const ProductDetail = () => {
           <div className="space-y-4">
             {reviews.map((review) => (
               <div key={review._id} className="border-b pb-4">
-                <div className="flex items-center mb-2">
-                  <span className="font-semibold mr-2">{review.user?.name}</span>
-                  <span className="text-yellow-500">{'⭐'.repeat(review.rating)}</span>
-                  {review.isVerifiedPurchase && (
-                    <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                      Verified Purchase
-                    </span>
-                  )}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center">
+                    <span className="font-semibold mr-2">{review.user?.name}</span>
+                    <span className="text-yellow-500">{'⭐'.repeat(review.rating)}</span>
+                    {review.isVerifiedPurchase && (
+                      <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                        Verified Purchase
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => openReportModal('review', review._id)}
+                    className="text-red-500 hover:text-red-700 text-xs flex items-center"
+                    title="Report this review"
+                  >
+                    🚩 Report
+                  </button>
                 </div>
                 <p className="text-gray-700">{review.comment}</p>
                 <p className="text-xs text-gray-500 mt-2">
@@ -206,6 +254,14 @@ const ProductDetail = () => {
           </div>
         )}
       </div>
+
+      <ReportModal
+        isOpen={reportModal.isOpen}
+        onClose={closeReportModal}
+        onSubmit={handleReportSubmit}
+        reportType={reportModal.type}
+        itemId={reportModal.itemId}
+      />
     </div>
   );
 };

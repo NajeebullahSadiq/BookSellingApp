@@ -31,7 +31,7 @@ const AdminDashboard = () => {
       <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
         <div className="card">
           <h3 className="text-gray-600 text-sm mb-1">Total Users</h3>
           <p className="text-3xl font-bold text-blue-600">{stats?.totalUsers || 0}</p>
@@ -43,6 +43,10 @@ const AdminDashboard = () => {
         <div className="card">
           <h3 className="text-gray-600 text-sm mb-1">Total Products</h3>
           <p className="text-3xl font-bold text-green-600">{stats?.totalProducts || 0}</p>
+        </div>
+        <div className="card">
+          <h3 className="text-gray-600 text-sm mb-1">Total Reports</h3>
+          <p className="text-3xl font-bold text-red-600">{stats?.totalReports || 0}</p>
         </div>
         <div className="card">
           <h3 className="text-gray-600 text-sm mb-1">Total Revenue</h3>
@@ -68,12 +72,15 @@ const AdminDashboard = () => {
       {/* Quick Actions */}
       <div className="card">
         <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Link to="/admin/users" className="btn-primary text-center">
             👥 Manage Users
           </Link>
           <Link to="/admin/products" className="btn-secondary text-center">
             📦 Manage Products
+          </Link>
+          <Link to="/admin/reports" className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-center">
+            🚩 Manage Reports
           </Link>
           <Link to="/admin/products?status=pending" className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-center">
             ⏳ Pending Approvals ({stats?.pendingProducts || 0})

@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
+const Report = require('../models/Report');
 const { createNotification } = require('./notificationController');
 
 // @desc    Get all users
@@ -157,6 +158,8 @@ exports.getDashboardStats = async (req, res) => {
     const pendingProducts = await Product.countDocuments({ status: 'pending' });
     const totalOrders = await Order.countDocuments();
     const completedOrders = await Order.countDocuments({ paymentStatus: 'completed' });
+    const totalReports = await Report.countDocuments();
+    const pendingReports = await Report.countDocuments({ status: 'pending' });
 
     const totalRevenue = await Order.aggregate([
       { $match: { paymentStatus: 'completed' } },
@@ -173,7 +176,9 @@ exports.getDashboardStats = async (req, res) => {
         pendingProducts,
         totalOrders,
         completedOrders,
-        totalRevenue: totalRevenue[0]?.total || 0
+        totalRevenue: totalRevenue[0]?.total || 0,
+        totalReports,
+        pendingReports
       }
     });
   } catch (error) {

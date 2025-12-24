@@ -20,17 +20,20 @@ import Profile from './pages/profile/Profile';
 import MyOrders from './pages/orders/MyOrders';
 import Wishlist from './pages/wishlist/Wishlist';
 import Notifications from './pages/notifications/Notifications';
+import Messages from './pages/messages/Messages';
 
 // Seller Pages
 import SellerDashboard from './pages/seller/SellerDashboard';
 import CreateProduct from './pages/seller/CreateProduct';
 import EditProduct from './pages/seller/EditProduct';
 import MyProducts from './pages/seller/MyProducts';
+import SellerAnalytics from './pages/seller/SellerAnalytics';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageUsers from './pages/admin/ManageUsers';
 import ManageProducts from './pages/admin/ManageProducts';
+import ManageReports from './pages/admin/ManageReports';
 
 function App() {
   return (
@@ -53,9 +56,12 @@ function App() {
           <Route path="/orders" element={<PrivateRoute><MyOrders /></PrivateRoute>} />
           <Route path="/wishlist" element={<PrivateRoute><Wishlist /></PrivateRoute>} />
           <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
+          <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
+          <Route path="/messages/:conversationId" element={<PrivateRoute><Messages /></PrivateRoute>} />
 
           {/* Seller Routes */}
           <Route path="/seller/dashboard" element={<PrivateRoute role="seller"><SellerDashboard /></PrivateRoute>} />
+          <Route path="/seller/analytics" element={<PrivateRoute role="seller"><SellerAnalytics /></PrivateRoute>} />
           <Route path="/seller/create-product" element={<PrivateRoute role="seller"><CreateProduct /></PrivateRoute>} />
           <Route path="/seller/edit-product/:id" element={<PrivateRoute role="seller"><EditProduct /></PrivateRoute>} />
           <Route path="/seller/products" element={<PrivateRoute role="seller"><MyProducts /></PrivateRoute>} />
@@ -64,6 +70,7 @@ function App() {
           <Route path="/admin/dashboard" element={<PrivateRoute role="admin"><AdminDashboard /></PrivateRoute>} />
           <Route path="/admin/users" element={<PrivateRoute role="admin"><ManageUsers /></PrivateRoute>} />
           <Route path="/admin/products" element={<PrivateRoute role="admin"><ManageProducts /></PrivateRoute>} />
+          <Route path="/admin/reports" element={<PrivateRoute role="admin"><ManageReports /></PrivateRoute>} />
         </Routes>
       </main>
       <Footer />

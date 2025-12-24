@@ -5,6 +5,7 @@ import { logout } from '../../store/slices/authSlice';
 import { setWishlist } from '../../store/slices/wishlistSlice';
 import { wishlistAPI } from '../../utils/api';
 import NotificationBell from '../common/NotificationBell';
+import MessageBell from '../common/MessageBell';
 
 const Navbar = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
@@ -98,11 +99,17 @@ const Navbar = () => {
                 </Link>
 
                 <NotificationBell />
+                <MessageBell />
 
                 {user?.role === 'seller' && (
-                  <Link to="/seller/dashboard" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                    Seller Dashboard
-                  </Link>
+                  <>
+                    <Link to="/seller/dashboard" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                      Seller Dashboard
+                    </Link>
+                    <Link to="/seller/analytics" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                      Analytics
+                    </Link>
+                  </>
                 )}
 
                 {user?.role === 'admin' && (
@@ -128,6 +135,9 @@ const Navbar = () => {
                       </Link>
                       <Link to="/notifications" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         Notifications
+                      </Link>
+                      <Link to="/messages" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        Messages
                       </Link>
                       <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         Logout

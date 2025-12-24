@@ -33,6 +33,9 @@ app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/wishlist', require('./routes/wishlistRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/seller', require('./routes/sellerRoutes'));
+app.use('/api/messages', require('./routes/messageRoutes'));
+app.use('/api/reports', require('./routes/reportRoutes'));
 
 // Health check
 app.get('/api/health', (req, res) => {
