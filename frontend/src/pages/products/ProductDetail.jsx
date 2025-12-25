@@ -11,6 +11,7 @@ import MessageButton from '../../components/common/MessageButton';
 import ReportModal from '../../components/common/ReportModal';
 import VerificationBadge from '../../components/common/VerificationBadge';
 import RecommendedProducts from '../../components/common/RecommendedProducts';
+import SocialShareButton from '../../components/common/SocialShareButton';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -146,13 +147,16 @@ const ProductDetail = () => {
         <div>
           <div className="flex justify-between items-start mb-4">
             <h1 className="text-3xl font-bold">{currentProduct.title}</h1>
-            <button
-              onClick={() => openReportModal('product', currentProduct._id)}
-              className="text-red-500 hover:text-red-700 text-sm flex items-center"
-              title="Report this product"
-            >
-              🚩 Report
-            </button>
+            <div className="flex gap-2">
+              <SocialShareButton product={currentProduct} variant="icon" size="md" />
+              <button
+                onClick={() => openReportModal('product', currentProduct._id)}
+                className="text-red-500 hover:text-red-700 text-sm flex items-center"
+                title="Report this product"
+              >
+                🚩 Report
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center mb-4">

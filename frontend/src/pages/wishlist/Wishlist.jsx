@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { setWishlistLoading, setWishlist, removeFromWishlist as removeFromWishlistAction } from '../../store/slices/wishlistSlice';
 import { addToCart } from '../../store/slices/cartSlice';
 import { wishlistAPI } from '../../utils/api';
+import SocialShareButton from '../../components/common/SocialShareButton';
 
 const Wishlist = () => {
   const dispatch = useDispatch();
@@ -129,19 +130,22 @@ const Wishlist = () => {
                 key={product._id}
                 className="card hover:shadow-xl transition-all duration-300 relative group"
               >
-                <button
-                  onClick={() => handleRemoveFromWishlist(product._id)}
-                  className="absolute top-2 right-2 z-10 bg-white rounded-full p-2 shadow-md hover:bg-red-50 transition-colors"
-                  title="Remove from wishlist"
-                >
-                  <svg
-                    className="h-5 w-5 text-red-500"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
+                <div className="absolute top-2 right-2 z-10 flex gap-2">
+                  <SocialShareButton product={product} variant="icon" size="sm" />
+                  <button
+                    onClick={() => handleRemoveFromWishlist(product._id)}
+                    className="bg-white rounded-full p-2 shadow-md hover:bg-red-50 transition-colors"
+                    title="Remove from wishlist"
                   >
-                    <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
-                  </svg>
-                </button>
+                    <svg
+                      className="h-5 w-5 text-red-500"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+                    </svg>
+                  </button>
+                </div>
 
                 <Link to={`/products/${product._id}`}>
                   {product.previewImage ? (

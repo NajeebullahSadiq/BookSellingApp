@@ -36,6 +36,7 @@ const Navbar = () => {
     if (isAuthenticated) {
       fetchWishlist();
     }
+    setIsUserMenuOpen(false);
   }, [isAuthenticated]);
 
   const fetchWishlist = async () => {

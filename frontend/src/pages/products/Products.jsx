@@ -9,6 +9,7 @@ import SearchBar from '../../components/common/SearchBar';
 import AdvancedFilters from '../../components/common/AdvancedFilters';
 import WishlistButton from '../../components/common/WishlistButton';
 import VerificationBadge from '../../components/common/VerificationBadge';
+import SocialShareButton from '../../components/common/SocialShareButton';
 
 const Products = () => {
   const [categories, setCategories] = useState([]);
@@ -171,7 +172,8 @@ const Products = () => {
                   key={product._id}
                   className="card hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative"
                 >
-                  <div className="absolute top-2 right-2 z-10">
+                  <div className="absolute top-2 right-2 z-10 flex gap-2">
+                    <SocialShareButton product={product} variant="icon" size="sm" />
                     <WishlistButton productId={product._id} size="md" />
                   </div>
 

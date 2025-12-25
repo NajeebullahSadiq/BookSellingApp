@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { addToCart } from '../../store/slices/cartSlice';
 import WishlistButton from './WishlistButton';
 import VerificationBadge from './VerificationBadge';
+import SocialShareButton from './SocialShareButton';
 
 const RecommendedProducts = ({ products, title = 'Recommended for You', loading = false }) => {
   const dispatch = useDispatch();
@@ -51,7 +52,8 @@ const RecommendedProducts = ({ products, title = 'Recommended for You', loading 
             key={product._id}
             className="card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 relative group"
           >
-            <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+              <SocialShareButton product={product} variant="icon" size="sm" />
               <WishlistButton productId={product._id} size="sm" />
             </div>
 
