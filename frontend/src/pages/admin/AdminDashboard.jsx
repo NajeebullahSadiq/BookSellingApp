@@ -72,12 +72,15 @@ const AdminDashboard = () => {
       {/* Quick Actions */}
       <div className="card">
         <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <Link to="/admin/users" className="btn-primary text-center">
             👥 Manage Users
           </Link>
           <Link to="/admin/products" className="btn-secondary text-center">
             📦 Manage Products
+          </Link>
+          <Link to="/admin/blogs" className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-center">
+            📝 Manage Blogs
           </Link>
           <Link to="/admin/reports" className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-center">
             🚩 Manage Reports

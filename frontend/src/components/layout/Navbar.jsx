@@ -69,6 +69,9 @@ const Navbar = () => {
             <Link to="/products" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
               Browse
             </Link>
+            <Link to="/blog" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+              Blog
+            </Link>
 
             {!isAuthenticated ? (
               <>

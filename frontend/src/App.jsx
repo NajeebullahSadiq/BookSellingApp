@@ -35,6 +35,11 @@ import ManageUsers from './pages/admin/ManageUsers';
 import ManageProducts from './pages/admin/ManageProducts';
 import ManageReports from './pages/admin/ManageReports';
 
+// Blog Pages
+import BlogList from './pages/blog/BlogList';
+import BlogDetail from './pages/blog/BlogDetail';
+import ManageBlogs from './pages/admin/ManageBlogs';
+
 function App() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -50,6 +55,8 @@ function App() {
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout/success" element={<CheckoutSuccess />} />
+          <Route path="/blog" element={<BlogList />} />
+          <Route path="/blog/:slug" element={<BlogDetail />} />
 
           {/* Protected Routes */}
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
@@ -71,6 +78,7 @@ function App() {
           <Route path="/admin/users" element={<PrivateRoute role="admin"><ManageUsers /></PrivateRoute>} />
           <Route path="/admin/products" element={<PrivateRoute role="admin"><ManageProducts /></PrivateRoute>} />
           <Route path="/admin/reports" element={<PrivateRoute role="admin"><ManageReports /></PrivateRoute>} />
+          <Route path="/admin/blogs" element={<PrivateRoute role="admin"><ManageBlogs /></PrivateRoute>} />
         </Routes>
       </main>
       <Footer />

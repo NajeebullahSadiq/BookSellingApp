@@ -128,4 +128,19 @@ export const recommendationAPI = {
   getPopular: (params) => API.get('/recommendations/popular', { params }),
 };
 
+// Blog APIs
+export const blogAPI = {
+  getAll: (params) => API.get('/blogs', { params }),
+  getBySlug: (slug) => API.get(`/blogs/slug/${slug}`),
+  getById: (id) => API.get(`/blogs/${id}`),
+  getRelated: (id) => API.get(`/blogs/${id}/related`),
+  create: (data) => API.post('/blogs', data, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  update: (id, data) => API.put(`/blogs/${id}`, data, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  delete: (id) => API.delete(`/blogs/${id}`),
+};
+
 export default API;
