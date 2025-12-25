@@ -1,5 +1,6 @@
 const Product = require('../models/Product');
 const User = require('../models/User');
+const ViewHistory = require('../models/ViewHistory');
 const fs = require('fs');
 const path = require('path');
 
@@ -352,6 +353,47 @@ exports.downloadProduct = async (req, res) => {
     await product.save();
 
     res.download(filePath, product.fileName);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Track product view (for logged-in users)
+// @route   POST /api/products/:id/track-view
+// @access  Private
+exports.trackView = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+
+    const existingView = await ViewHistory.findOne({
+      user: req.user._id,
+      product: req.params.id
+    });
+
+    if (existingView) {
+      existingView.viewedAt = Date.now();
+      await existingView.save();
+    } else {
+      await ViewHistory.create({
+        user: req.user._id,
+        product: req.params.id
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'View tracked'
+    });
   } catch (error) {
     res.status(500).json({
       success: false,

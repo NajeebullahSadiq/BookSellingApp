@@ -1,8 +1,43 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { recommendationAPI } from '../utils/api';
+import RecommendedProducts from '../components/common/RecommendedProducts';
 
 const Home = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const [recommendations, setRecommendations] = useState({ forYou: [], trending: [], popular: [] });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchRecommendations();
+  }, [isAuthenticated]);
+
+  const fetchRecommendations = async () => {
+    try {
+      setLoading(true);
+      const requests = [
+        recommendationAPI.getTrending({ limit: 6 }),
+        recommendationAPI.getPopular({ limit: 6 })
+      ];
+
+      if (isAuthenticated) {
+        requests.push(recommendationAPI.getForYou({ limit: 6 }));
+      }
+
+      const responses = await Promise.all(requests);
+
+      setRecommendations({
+        trending: responses[0].data.data,
+        popular: responses[1].data.data,
+        forYou: isAuthenticated ? responses[2].data.data : []
+      });
+    } catch (error) {
+      console.error('Failed to fetch recommendations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -21,6 +56,41 @@ const Home = () => {
               </Link>
             )}
           </div>
+        </div>
+      </section>
+
+      {/* Personalized Recommendations */}
+      {isAuthenticated && recommendations.forYou.length > 0 && (
+        <section className="py-12 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RecommendedProducts 
+              products={recommendations.forYou} 
+              title="Recommended for You" 
+              loading={loading}
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Trending Products */}
+      <section className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <RecommendedProducts 
+            products={recommendations.trending} 
+            title="🔥 Trending Now" 
+            loading={loading}
+          />
+        </div>
+      </section>
+
+      {/* Popular Products */}
+      <section className="py-12 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <RecommendedProducts 
+            products={recommendations.popular} 
+            title="⭐ Most Popular" 
+            loading={loading}
+          />
         </div>
       </section>
 

@@ -4,12 +4,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { setCurrentProduct } from '../../store/slices/productSlice';
 import { addToCart } from '../../store/slices/cartSlice';
-import { productAPI, reviewAPI, reportAPI } from '../../utils/api';
+import { productAPI, reviewAPI, reportAPI, recommendationAPI } from '../../utils/api';
 import WishlistButton from '../../components/common/WishlistButton';
 import ProductPreview from '../../components/common/ProductPreview';
 import MessageButton from '../../components/common/MessageButton';
 import ReportModal from '../../components/common/ReportModal';
 import VerificationBadge from '../../components/common/VerificationBadge';
+import RecommendedProducts from '../../components/common/RecommendedProducts';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -17,6 +18,8 @@ const ProductDetail = () => {
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [loading, setLoading] = useState(true);
   const [reportModal, setReportModal] = useState({ isOpen: false, type: '', itemId: '' });
+  const [similarProducts, setSimilarProducts] = useState([]);
+  const [loadingSimilar, setLoadingSimilar] = useState(false);
 
   const dispatch = useDispatch();
   const { currentProduct } = useSelector((state) => state.products);
@@ -25,7 +28,31 @@ const ProductDetail = () => {
   useEffect(() => {
     fetchProduct();
     fetchReviews();
+    fetchSimilarProducts();
+    if (isAuthenticated) {
+      trackProductView();
+    }
   }, [id]);
+
+  const trackProductView = async () => {
+    try {
+      await productAPI.trackView(id);
+    } catch (error) {
+      console.error('Failed to track view:', error);
+    }
+  };
+
+  const fetchSimilarProducts = async () => {
+    try {
+      setLoadingSimilar(true);
+      const { data } = await recommendationAPI.getSimilar(id, { limit: 6 });
+      setSimilarProducts(data.data);
+    } catch (error) {
+      console.error('Failed to fetch similar products:', error);
+    } finally {
+      setLoadingSimilar(false);
+    }
+  };
 
   const fetchProduct = async () => {
     try {
@@ -265,6 +292,17 @@ const ProductDetail = () => {
         reportType={reportModal.type}
         itemId={reportModal.itemId}
       />
+
+      {/* Similar Products */}
+      {similarProducts.length > 0 && (
+        <div className="mt-12">
+          <RecommendedProducts 
+            products={similarProducts} 
+            title="Similar Products You May Like" 
+            loading={loadingSimilar}
+          />
+        </div>
+      )}
     </div>
   );
 };

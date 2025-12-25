@@ -38,6 +38,7 @@ export const productAPI = {
   delete: (id) => API.delete(`/products/${id}`),
   getMyProducts: () => API.get('/products/seller/my-products'),
   download: (id) => API.get(`/products/${id}/download`, { responseType: 'blob' }),
+  trackView: (id) => API.post(`/products/${id}/track-view`),
 };
 
 // Order APIs
@@ -116,6 +117,15 @@ export const reportAPI = {
   delete: (id) => API.delete(`/reports/${id}`),
   getMyReports: () => API.get('/reports/my-reports'),
   getStats: () => API.get('/reports/stats'),
+};
+
+// Recommendation APIs
+export const recommendationAPI = {
+  getPersonalized: (params) => API.get('/recommendations/personalized', { params }),
+  getForYou: (params) => API.get('/recommendations/for-you', { params }),
+  getSimilar: (productId, params) => API.get(`/recommendations/similar/${productId}`, { params }),
+  getTrending: (params) => API.get('/recommendations/trending', { params }),
+  getPopular: (params) => API.get('/recommendations/popular', { params }),
 };
 
 export default API;

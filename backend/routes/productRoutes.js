@@ -7,7 +7,8 @@ const {
   updateProduct,
   deleteProduct,
   getSellerProducts,
-  downloadProduct
+  downloadProduct,
+  trackView
 } = require('../controllers/productController');
 const { protect, authorize, checkSellerApproval } = require('../middleware/auth');
 const { uploadProductWithImage } = require('../middleware/upload');
@@ -16,6 +17,7 @@ router.get('/', getProducts);
 router.get('/seller/my-products', protect, authorize('seller'), getSellerProducts);
 router.get('/:id', getProductById);
 router.get('/:id/download', protect, downloadProduct);
+router.post('/:id/track-view', protect, trackView);
 
 router.post(
   '/',

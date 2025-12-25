@@ -50,7 +50,7 @@ exports.createReport = async (req, res) => {
 
     await report.populate([
       { path: 'reportedBy', select: 'name email' },
-      { path: 'reportedItem' }
+      { path: 'reportedItem', model: reportType === 'review' ? 'Review' : 'Product' }
     ]);
 
     res.status(201).json({

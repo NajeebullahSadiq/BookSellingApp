@@ -6,10 +6,17 @@ const reportSchema = new mongoose.Schema({
     enum: ['product', 'review'],
     required: true
   },
+  reportedModel: {
+    type: String,
+    enum: ['Product', 'Review'],
+    default: function() {
+      return this.reportType === 'product' ? 'Product' : 'Review';
+    }
+  },
   reportedItem: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    refPath: 'reportType'
+    refPath: 'reportedModel'
   },
   reportedBy: {
     type: mongoose.Schema.Types.ObjectId,
