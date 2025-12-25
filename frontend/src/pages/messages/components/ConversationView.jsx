@@ -11,6 +11,14 @@ const ConversationView = ({ conversation, onMessageSent, socket }) => {
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
+  const resolveImageUrl = (url) => {
+    if (!url) return url;
+    if (/^https?:\/\//i.test(url)) return url;
+    const base = import.meta.env.VITE_API_URL || '';
+    const normalized = url.startsWith('/') ? url : `/${url}`;
+    return `${base}${normalized}`;
+  };
+
   useEffect(() => {
     if (conversation) {
       fetchMessages();
@@ -147,7 +155,7 @@ const ConversationView = ({ conversation, onMessageSent, socket }) => {
         <div className="p-3 bg-blue-50 border-b flex items-center gap-3">
           {conversation.product.previewImage ? (
             <img
-              src={`${import.meta.env.VITE_API_URL}${conversation.product.previewImage}`}
+              src={resolveImageUrl(conversation.product.previewImage)}
               alt={conversation.product.title}
               className="w-12 h-12 object-cover rounded"
             />

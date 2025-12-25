@@ -12,6 +12,14 @@ import VerificationBadge from '../../components/common/VerificationBadge';
 import SocialShareButton from '../../components/common/SocialShareButton';
 
 const Products = () => {
+  const resolveImageUrl = (url) => {
+    if (!url) return url;
+    if (/^https?:\/\//i.test(url)) return url;
+    const base = import.meta.env.VITE_API_URL || '';
+    const normalized = url.startsWith('/') ? url : `/${url}`;
+    return `${base}${normalized}`;
+  };
+
   const [categories, setCategories] = useState([]);
   const [filters, setFilters] = useState({
     search: '',
@@ -180,7 +188,7 @@ const Products = () => {
                   <Link to={`/products/${product._id}`}>
                     {product.previewImage ? (
                       <img
-                        src={`${import.meta.env.VITE_API_URL}${product.previewImage}`}
+                        src={resolveImageUrl(product.previewImage)}
                         alt={product.title}
                         className="w-full h-48 object-cover rounded-t-lg mb-4"
                       />

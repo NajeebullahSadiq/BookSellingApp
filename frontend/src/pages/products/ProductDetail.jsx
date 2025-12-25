@@ -22,6 +22,14 @@ const ProductDetail = () => {
   const [similarProducts, setSimilarProducts] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
 
+  const resolveImageUrl = (url) => {
+    if (!url) return url;
+    if (/^https?:\/\//i.test(url)) return url;
+    const base = import.meta.env.VITE_API_URL || '';
+    const normalized = url.startsWith('/') ? url : `/${url}`;
+    return `${base}${normalized}`;
+  };
+
   const dispatch = useDispatch();
   const { currentProduct } = useSelector((state) => state.products);
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -132,7 +140,7 @@ const ProductDetail = () => {
         <div>
           {currentProduct.previewImage ? (
             <img
-              src={`${import.meta.env.VITE_API_URL}${currentProduct.previewImage}`}
+              src={resolveImageUrl(currentProduct.previewImage)}
               alt={currentProduct.title}
               className="w-full rounded-lg shadow-lg"
             />

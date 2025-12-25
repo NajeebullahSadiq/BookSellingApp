@@ -7,6 +7,14 @@ import VerificationBadge from './VerificationBadge';
 import SocialShareButton from './SocialShareButton';
 
 const RecommendedProducts = ({ products, title = 'Recommended for You', loading = false }) => {
+  const resolveImageUrl = (url) => {
+    if (!url) return url;
+    if (/^https?:\/\//i.test(url)) return url;
+    const base = import.meta.env.VITE_API_URL || '';
+    const normalized = url.startsWith('/') ? url : `/${url}`;
+    return `${base}${normalized}`;
+  };
+
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
 
@@ -59,7 +67,7 @@ const RecommendedProducts = ({ products, title = 'Recommended for You', loading 
 
             {product.previewImage ? (
               <img
-                src={`${import.meta.env.VITE_API_URL}${product.previewImage}`}
+                src={resolveImageUrl(product.previewImage)}
                 alt={product.title}
                 className="w-full h-32 object-cover rounded-t-lg mb-2"
               />

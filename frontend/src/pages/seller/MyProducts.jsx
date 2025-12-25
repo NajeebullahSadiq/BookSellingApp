@@ -9,6 +9,14 @@ const MyProducts = () => {
   const [loading, setLoading] = useState(true);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, productId: null, productTitle: '' });
 
+  const resolveImageUrl = (url) => {
+    if (!url) return url;
+    if (/^https?:\/\//i.test(url)) return url;
+    const base = import.meta.env.VITE_API_URL || '';
+    const normalized = url.startsWith('/') ? url : `/${url}`;
+    return `${base}${normalized}`;
+  };
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -71,7 +79,7 @@ const MyProducts = () => {
                 <div className="flex flex-1">
                   {product.previewImage ? (
                     <img
-                      src={`${import.meta.env.VITE_API_URL}${product.previewImage}`}
+                      src={resolveImageUrl(product.previewImage)}
                       alt={product.title}
                       className="w-24 h-24 object-cover rounded mr-4"
                     />

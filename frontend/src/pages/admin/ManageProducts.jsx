@@ -11,6 +11,14 @@ const ManageProducts = () => {
   const [filter, setFilter] = useState(searchParams.get('status') || '');
   const [rejectionModal, setRejectionModal] = useState({ isOpen: false, productId: null });
 
+  const resolveImageUrl = (url) => {
+    if (!url) return url;
+    if (/^https?:\/\//i.test(url)) return url;
+    const base = import.meta.env.VITE_API_URL || '';
+    const normalized = url.startsWith('/') ? url : `/${url}`;
+    return `${base}${normalized}`;
+  };
+
   useEffect(() => {
     fetchProducts();
   }, [filter]);
@@ -117,7 +125,7 @@ const ManageProducts = () => {
                 <div className="flex flex-1">
                   {product.previewImage ? (
                     <img
-                      src={`${import.meta.env.VITE_API_URL}${product.previewImage}`}
+                      src={resolveImageUrl(product.previewImage)}
                       alt={product.title}
                       className="w-24 h-24 object-cover rounded mr-4"
                     />

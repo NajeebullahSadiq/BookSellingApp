@@ -15,6 +15,14 @@ const SellerAnalytics = () => {
   const [period, setPeriod] = useState('30days');
   const [topProductsSort, setTopProductsSort] = useState('revenue');
 
+  const resolveImageUrl = (url) => {
+    if (!url) return url;
+    if (/^https?:\/\//i.test(url)) return url;
+    const base = import.meta.env.VITE_API_URL || '';
+    const normalized = url.startsWith('/') ? url : `/${url}`;
+    return `${base}${normalized}`;
+  };
+
   useEffect(() => {
     console.log('SellerAnalytics component mounted');
     fetchAnalytics();
@@ -167,7 +175,7 @@ const SellerAnalytics = () => {
                   </div>
                   {product.previewImage && (
                     <img
-                      src={`${import.meta.env.VITE_API_URL}${product.previewImage}`}
+                      src={resolveImageUrl(product.previewImage)}
                       alt={product.title}
                       className="w-12 h-12 object-cover rounded"
                     />

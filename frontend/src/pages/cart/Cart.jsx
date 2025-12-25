@@ -9,6 +9,14 @@ import { loadStripe } from '@stripe/stripe-js';
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_mockkey');
 
 const Cart = () => {
+  const resolveImageUrl = (url) => {
+    if (!url) return url;
+    if (/^https?:\/\//i.test(url)) return url;
+    const base = import.meta.env.VITE_API_URL || '';
+    const normalized = url.startsWith('/') ? url : `/${url}`;
+    return `${base}${normalized}`;
+  };
+
   const { items, total } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -73,7 +81,7 @@ const Cart = () => {
             <div key={item._id} className="card flex items-center">
               {item.previewImage ? (
                 <img
-                  src={`${import.meta.env.VITE_API_URL}${item.previewImage}`}
+                  src={resolveImageUrl(item.previewImage)}
                   alt={item.title}
                   className="w-24 h-24 object-cover rounded mr-4"
                 />

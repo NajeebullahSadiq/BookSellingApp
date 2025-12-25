@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 
 // Import models
 const User = require('./models/User');
@@ -7,6 +9,7 @@ const Category = require('./models/Category');
 const Product = require('./models/Product');
 const Order = require('./models/Order');
 const Review = require('./models/Review');
+const Blog = require('./models/Blog');
 
 // Database connection
 const connectDB = async () => {
@@ -31,12 +34,40 @@ const seedDatabase = async () => {
     // Connect to database
     await connectDB();
 
+    const uploadsProductsDir = path.join(__dirname, 'uploads', 'products');
+    if (!fs.existsSync(uploadsProductsDir)) {
+      fs.mkdirSync(uploadsProductsDir, { recursive: true });
+    }
+
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const randFloat = (min, max) => Math.round((min + Math.random() * (max - min)) * 100) / 100;
+    const slugify = (value) => {
+      return String(value)
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+    };
+    const getInternetImageUrl = (seed, width = 800, height = 600) => {
+      return `https://picsum.photos/seed/${encodeURIComponent(seed)}/${width}/${height}`;
+    };
+    const writePdfPlaceholder = (absolutePath, title) => {
+      const content = Buffer.from(
+        `%PDF-1.4\n%\u00e2\u00e3\u00cf\u00d3\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n4 0 obj\n<< /Length 88 >>\nstream\nBT\n/F1 24 Tf\n72 720 Td\n(${String(title).replace(/\(|\)/g, '')}) Tj\nET\nendstream\nendobj\n5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\nxref\n0 6\n0000000000 65535 f\ntrailer\n<< /Root 1 0 R /Size 6 >>\nstartxref\n0\n%%EOF\n`,
+        'utf8'
+      );
+      fs.writeFileSync(absolutePath, content);
+      return content.length;
+    };
+
     // Clear existing data
     await User.deleteMany({});
     await Category.deleteMany({});
     await Product.deleteMany({});
     await Order.deleteMany({});
     await Review.deleteMany({});
+    await Blog.deleteMany({});
 
     console.log('Data cleared from database');
 
@@ -148,110 +179,102 @@ const seedDatabase = async () => {
     console.log('Categories created');
 
     // Create products
-    const csTextbook = await Product.create({
-      title: 'Introduction to Computer Science Textbook',
-      description: 'Comprehensive textbook covering all fundamentals of computer science including algorithms, data structures, and programming concepts.',
-      price: 45.99,
+    const productSubcategories = {
+      [textbooksCategory._id.toString()]: ['Computer Science', 'Business', 'Engineering', 'Biology', 'Economics', 'Law'],
+      [notesCategory._id.toString()]: ['Mathematics', 'Physics', 'Chemistry', 'History', 'English', 'Statistics'],
+      [guidesCategory._id.toString()]: ['Psychology', 'Exam Prep', 'GRE', 'IELTS', 'Research Methods'],
+      [papersCategory._id.toString()]: ['Artificial Intelligence', 'Data Science', 'Networks', 'Security', 'HCI'],
+      [projectsCategory._id.toString()]: ['Database Systems', 'Web Development', 'Mobile Apps', 'Machine Learning', 'DevOps']
+    };
+
+    const categories = [
+      textbooksCategory,
+      notesCategory,
+      guidesCategory,
+      papersCategory,
+      projectsCategory
+    ];
+    const sellers = [janeUser._id, robertUser._id];
+
+    const specialProductObjectId = new mongoose.Types.ObjectId('6949529122cc4e8637ee03ab');
+    const specialTitle = 'Download Test Product (Seeded)';
+    const specialFileBasename = 'product-6949529122cc4e8637ee03ab.pdf';
+    const specialAbsoluteFilePath = path.join(uploadsProductsDir, specialFileBasename);
+    const specialFileSize = writePdfPlaceholder(specialAbsoluteFilePath, specialTitle);
+
+    const productsToInsert = [];
+    productsToInsert.push({
+      _id: specialProductObjectId,
+      title: specialTitle,
+      description: 'Seeded product to test the download endpoint. This file is generated locally by seeder.js.',
+      price: 9.99,
       category: textbooksCategory._id,
       subcategory: 'Computer Science',
-      tags: ['programming', 'algorithms', 'computer science', 'beginner'],
+      tags: ['download', 'test', 'seed'],
       seller: janeUser._id,
-      fileUrl: 'files/intro-cs-textbook.pdf',
-      fileName: 'intro-cs-textbook.pdf',
-      fileSize: 12500000,
+      fileUrl: path.posix.join('uploads', 'products', specialFileBasename),
+      fileName: specialFileBasename,
+      fileSize: specialFileSize,
       fileType: 'application/pdf',
-      previewImage: 'images/intro-cs-cover.jpg',
-      downloads: 87,
-      views: 340,
-      rating: 4.7,
-      numReviews: 24,
+      previewImage: getInternetImageUrl('seed-special-product', 800, 1100),
+      downloads: randInt(0, 20),
+      views: randInt(10, 200),
+      rating: randFloat(4.0, 5.0),
+      numReviews: randInt(0, 15),
       status: 'approved',
-      isActive: true
+      isActive: true,
+      previewPages: [],
+      previewPagesCount: 0
     });
 
-    const calculusNotes = await Product.create({
-      title: 'Advanced Calculus Lecture Notes',
-      description: 'Detailed lecture notes for advanced calculus covering limits, derivatives, integrals, series, and multivariable calculus.',
-      price: 15.99,
-      category: notesCategory._id,
-      subcategory: 'Mathematics',
-      tags: ['calculus', 'mathematics', 'advanced', 'notes'],
-      seller: robertUser._id,
-      fileUrl: 'files/advanced-calculus-notes.pdf',
-      fileName: 'advanced-calculus-notes.pdf',
-      fileSize: 5200000,
-      fileType: 'application/pdf',
-      previewImage: 'images/calculus-notes-cover.jpg',
-      downloads: 45,
-      views: 190,
-      rating: 4.5,
-      numReviews: 12,
-      status: 'approved',
-      isActive: true
-    });
+    const adjectives = ['Advanced', 'Complete', 'Practical', 'Modern', 'Essential', 'Ultimate', 'Quick', 'Master', 'Hands-On'];
+    const subjects = ['Algorithms', 'Calculus', 'Psychology', 'Databases', 'Machine Learning', 'Physics', 'Statistics', 'Marketing', 'Economics', 'Cybersecurity'];
+    const formats = ['Guide', 'Notes', 'Workbook', 'Project', 'Cheat Sheet', 'Textbook', 'Case Study', 'Tutorial'];
+    const tagPool = ['study', 'exam', 'university', 'assignment', 'pdf', 'reference', 'beginner', 'advanced', 'practice'];
 
-    const databaseProject = await Product.create({
-      title: 'Database Design Project',
-      description: 'Complete database design project with ER diagrams, normalization steps, SQL scripts, and implementation details.',
-      price: 29.99,
-      category: projectsCategory._id,
-      subcategory: 'Database Systems',
-      tags: ['database', 'SQL', 'project', 'design'],
-      seller: janeUser._id,
-      fileUrl: 'files/database-design-project.zip',
-      fileName: 'database-design-project.zip',
-      fileSize: 8400000,
-      fileType: 'application/zip',
-      previewImage: 'images/database-project-cover.jpg',
-      downloads: 32,
-      views: 147,
-      rating: 4.8,
-      numReviews: 9,
-      status: 'approved',
-      isActive: true
-    });
+    const totalProducts = 300;
+    const remaining = totalProducts - 1;
+    for (let i = 0; i < remaining; i++) {
+      const categoryObj = pick(categories);
+      const categoryIdStr = categoryObj._id.toString();
+      const subcategory = pick(productSubcategories[categoryIdStr] || ['General']);
 
-    const psychologyGuide = await Product.create({
-      title: 'Psychology Study Guide',
-      description: 'Comprehensive study guide for introductory psychology, covering all major concepts, theories, and key figures.',
-      price: 12.99,
-      category: guidesCategory._id,
-      subcategory: 'Psychology',
-      tags: ['psychology', 'study guide', 'exam prep'],
-      seller: robertUser._id,
-      fileUrl: 'files/psychology-study-guide.pdf',
-      fileName: 'psychology-study-guide.pdf',
-      fileSize: 3800000,
-      fileType: 'application/pdf',
-      previewImage: 'images/psychology-guide-cover.jpg',
-      downloads: 78,
-      views: 253,
-      rating: 4.6,
-      numReviews: 18,
-      status: 'approved',
-      isActive: true
-    });
+      const title = `${pick(adjectives)} ${pick(subjects)} ${pick(formats)} #${i + 1}`;
+      const baseSlug = slugify(title);
+      const fileBasename = `${baseSlug}.pdf`;
+      const absoluteFilePath = path.join(uploadsProductsDir, fileBasename);
+      const fileSize = writePdfPlaceholder(absoluteFilePath, title);
 
-    const mlPaper = await Product.create({
-      title: 'Machine Learning Research Paper',
-      description: 'Original research paper on novel approaches to supervised learning algorithms with implementation examples.',
-      price: 18.99,
-      category: papersCategory._id,
-      subcategory: 'Artificial Intelligence',
-      tags: ['machine learning', 'AI', 'research', 'algorithms'],
-      seller: janeUser._id,
-      fileUrl: 'files/ml-research-paper.pdf',
-      fileName: 'ml-research-paper.pdf',
-      fileSize: 2100000,
-      fileType: 'application/pdf',
-      previewImage: 'images/ml-paper-cover.jpg',
-      downloads: 41,
-      views: 165,
-      rating: 4.9,
-      numReviews: 7,
-      status: 'approved',
-      isActive: true
-    });
+      productsToInsert.push({
+        title,
+        description: `High-quality ${subcategory} resource for students. Includes clear explanations, examples, and practice questions.`,
+        price: randFloat(4.99, 59.99),
+        category: categoryObj._id,
+        subcategory,
+        tags: Array.from(new Set([pick(tagPool), pick(tagPool), pick(tagPool), subcategory.toLowerCase()])),
+        seller: pick(sellers),
+        fileUrl: path.posix.join('uploads', 'products', fileBasename),
+        fileName: fileBasename,
+        fileSize,
+        fileType: 'application/pdf',
+        previewImage: getInternetImageUrl(`product-${baseSlug}`, 800, 1100),
+        downloads: randInt(0, 250),
+        views: randInt(20, 1200),
+        rating: randFloat(3.5, 5.0),
+        numReviews: randInt(0, 60),
+        status: 'approved',
+        isActive: true,
+        previewPages: [],
+        previewPagesCount: 0
+      });
+    }
+
+    const createdProducts = await Product.insertMany(productsToInsert);
+    const csTextbook = createdProducts.find((p) => p._id.toString() === specialProductObjectId.toString());
+    const calculusNotes = createdProducts[1];
+    const databaseProject = createdProducts[2];
+    const psychologyGuide = createdProducts[3];
+    const mlPaper = createdProducts[4];
 
     console.log('Products created');
 
@@ -261,12 +284,12 @@ const seedDatabase = async () => {
       items: [
         {
           product: csTextbook._id,
-          title: 'Introduction to Computer Science Textbook',
-          price: 45.99,
+          title: csTextbook.title,
+          price: csTextbook.price,
           seller: janeUser._id
         }
       ],
-      totalAmount: 45.99,
+      totalAmount: csTextbook.price,
       paymentStatus: 'completed',
       paymentMethod: 'stripe',
       stripePaymentId: 'pi_3NpT7Q2eZvKYlo2C1KGZf7Sg',
@@ -279,18 +302,18 @@ const seedDatabase = async () => {
       items: [
         {
           product: calculusNotes._id,
-          title: 'Advanced Calculus Lecture Notes',
-          price: 15.99,
-          seller: robertUser._id
+          title: calculusNotes.title,
+          price: calculusNotes.price,
+          seller: calculusNotes.seller
         },
         {
           product: psychologyGuide._id,
-          title: 'Psychology Study Guide',
-          price: 12.99,
-          seller: robertUser._id
+          title: psychologyGuide.title,
+          price: psychologyGuide.price,
+          seller: psychologyGuide.seller
         }
       ],
-      totalAmount: 28.98,
+      totalAmount: Math.round((calculusNotes.price + psychologyGuide.price) * 100) / 100,
       paymentStatus: 'completed',
       paymentMethod: 'stripe',
       stripePaymentId: 'pi_3NqR8Z2eZvKYlo2C0JyKl9Tp',
@@ -303,12 +326,12 @@ const seedDatabase = async () => {
       items: [
         {
           product: databaseProject._id,
-          title: 'Database Design Project',
-          price: 29.99,
-          seller: janeUser._id
+          title: databaseProject.title,
+          price: databaseProject.price,
+          seller: databaseProject.seller
         }
       ],
-      totalAmount: 29.99,
+      totalAmount: databaseProject.price,
       paymentStatus: 'completed',
       paymentMethod: 'stripe',
       stripePaymentId: 'pi_3NsT9X2eZvKYlo2C0KpMb3Rx',
@@ -321,12 +344,12 @@ const seedDatabase = async () => {
       items: [
         {
           product: mlPaper._id,
-          title: 'Machine Learning Research Paper',
-          price: 18.99,
-          seller: janeUser._id
+          title: mlPaper.title,
+          price: mlPaper.price,
+          seller: mlPaper.seller
         }
       ],
-      totalAmount: 18.99,
+      totalAmount: mlPaper.price,
       paymentStatus: 'pending',
       paymentMethod: 'stripe',
       stripePaymentId: null,
@@ -378,6 +401,47 @@ const seedDatabase = async () => {
     });
 
     console.log('Reviews created');
+
+    const blogCategories = ['tips', 'guides', 'news', 'resources', 'tutorials', 'updates'];
+    const blogTagsPool = ['students', 'productivity', 'study', 'exams', 'notes', 'books', 'research', 'writing', 'career', 'learning'];
+    const blogsToInsert = [];
+    for (let i = 0; i < 30; i++) {
+      const title = `${pick(adjectives)} Study Tips for ${pick(subjects)} (${i + 1})`;
+      const slug = `${slugify(title)}-${i + 1}`;
+      const excerpt = `A short guide to help you learn ${pick(subjects)} faster with practical strategies and resources.`;
+      const content = `This article covers practical strategies to improve your learning in ${pick(subjects)}.\n\n` +
+        `1) Plan your week\n2) Use active recall\n3) Practice with examples\n4) Review your mistakes\n\n` +
+        `Recommended resources and templates are included.`;
+      const wordCount = content.split(/\s+/).filter(Boolean).length;
+      const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+
+      const relatedCount = randInt(0, 3);
+      const relatedProducts = [];
+      for (let j = 0; j < relatedCount; j++) {
+        relatedProducts.push(pick(createdProducts)._id);
+      }
+
+      blogsToInsert.push({
+        title,
+        slug,
+        excerpt,
+        content,
+        featuredImage: getInternetImageUrl(`blog-${slug}`, 1200, 630),
+        author: adminUser._id,
+        category: pick(blogCategories),
+        tags: Array.from(new Set([pick(blogTagsPool), pick(blogTagsPool), pick(blogTagsPool)])),
+        metaTitle: title,
+        metaDescription: excerpt,
+        metaKeywords: Array.from(new Set([pick(blogTagsPool), pick(blogTagsPool), pick(blogTagsPool)])),
+        status: 'published',
+        publishedAt: new Date(Date.now() - randInt(1, 90) * 24 * 60 * 60 * 1000),
+        views: randInt(0, 5000),
+        readingTime,
+        relatedProducts: Array.from(new Set(relatedProducts.map((id) => id.toString()))).map((id) => new mongoose.Types.ObjectId(id))
+      });
+    }
+
+    await Blog.insertMany(blogsToInsert);
 
     console.log('Database seeding completed successfully!');
     
