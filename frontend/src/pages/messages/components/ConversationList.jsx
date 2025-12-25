@@ -22,6 +22,9 @@ const ConversationList = ({ conversations, selectedConversation, onSelectConvers
   const getUnreadCount = (conversation) => {
     if (!conversation.unreadCount || !user) return 0;
     const unreadMap = conversation.unreadCount;
+    if (typeof unreadMap.get === 'function') {
+      return unreadMap.get(user._id) || 0;
+    }
     return unreadMap[user._id] || 0;
   };
 

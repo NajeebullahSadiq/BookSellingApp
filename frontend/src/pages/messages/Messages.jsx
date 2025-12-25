@@ -1,20 +1,73 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { messageAPI } from '../../utils/api';
 import { toast } from 'react-toastify';
 import ConversationList from './components/ConversationList';
 import ConversationView from './components/ConversationView';
+import { connectSocket, disconnectSocket } from '../../utils/socket';
 
 const Messages = () => {
   const { conversationId } = useParams();
+  const { token, user } = useSelector((state) => state.auth);
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [totalUnread, setTotalUnread] = useState(0);
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     fetchConversations();
   }, []);
+
+  useEffect(() => {
+    if (!token) return;
+
+    const s = connectSocket(token);
+    setSocket(s);
+
+    const getUnreadForUser = (conversation) => {
+      if (!conversation?.unreadCount || !user?._id) return 0;
+      if (typeof conversation.unreadCount.get === 'function') {
+        return conversation.unreadCount.get(user._id) || 0;
+      }
+      return conversation.unreadCount[user._id] || 0;
+    };
+
+    const recomputeTotalUnread = (nextConversations) => {
+      const total = nextConversations.reduce((sum, conv) => sum + getUnreadForUser(conv), 0);
+      setTotalUnread(total);
+    };
+
+    const handleConversationUpsert = (updatedConversation) => {
+      setConversations((prev) => {
+        const existingIndex = prev.findIndex((c) => c._id === updatedConversation._id);
+        let next;
+
+        if (existingIndex === -1) {
+          next = [updatedConversation, ...prev];
+        } else {
+          next = prev.map((c) => (c._id === updatedConversation._id ? updatedConversation : c));
+        }
+
+        next.sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt));
+        recomputeTotalUnread(next);
+        return next;
+      });
+
+      setSelectedConversation((prev) =>
+        prev?._id === updatedConversation._id ? updatedConversation : prev
+      );
+    };
+
+    s.on('conversation:upsert', handleConversationUpsert);
+
+    return () => {
+      s.off('conversation:upsert', handleConversationUpsert);
+      disconnectSocket();
+      setSocket(null);
+    };
+  }, [token, user?._id]);
 
   useEffect(() => {
     if (conversationId) {
@@ -48,8 +101,11 @@ const Messages = () => {
     setSelectedConversation(conversation);
   };
 
-  const handleMessageSent = () => {
-    fetchConversations();
+  const handleMessageSent = (updatedConversation) => {
+    if (!updatedConversation?._id) return;
+    setConversations((prev) =>
+      prev.map((c) => (c._id === updatedConversation._id ? updatedConversation : c))
+    );
   };
 
   const handleDeleteConversation = async (id) => {
@@ -93,6 +149,7 @@ const Messages = () => {
             <ConversationView
               conversation={selectedConversation}
               onMessageSent={handleMessageSent}
+              socket={socket}
             />
           ) : (
             <div className="card h-full flex items-center justify-center">

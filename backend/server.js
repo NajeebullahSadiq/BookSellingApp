@@ -3,6 +3,8 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const path = require('path');
+const http = require('http');
+const { initSocket } = require('./utils/socket');
 
 // Load environment variables
 dotenv.config();
@@ -54,8 +56,11 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 6000;
+const httpServer = http.createServer(app);
+initSocket(httpServer);
 
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 5000;
+
+httpServer.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });

@@ -4,11 +4,8 @@ const MessageInput = ({ onSendMessage }) => {
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+  const submitMessage = async () => {
     if (!message.trim() || sending) return;
-
     setSending(true);
     try {
       await onSendMessage(message.trim());
@@ -20,10 +17,15 @@ const MessageInput = ({ onSendMessage }) => {
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await submitMessage();
+  };
+
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit(e);
+      submitMessage();
     }
   };
 
@@ -32,14 +34,15 @@ const MessageInput = ({ onSendMessage }) => {
       <textarea
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        onKeyPress={handleKeyPress}
+        onKeyDown={handleKeyDown}
         placeholder="Type a message..."
         className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
         rows="2"
         disabled={sending}
       />
       <button
-        type="submit"
+        type="button"
+        onClick={submitMessage}
         disabled={!message.trim() || sending}
         className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors self-end"
       >

@@ -2,6 +2,52 @@ const Blog = require('../models/Blog');
 const fs = require('fs');
 const path = require('path');
 
+ const normalizeRelatedProducts = (value) => {
+   if (value === undefined) return undefined;
+   if (value === null) return [];
+
+   if (Array.isArray(value)) {
+     if (
+       value.length === 1 &&
+       typeof value[0] === 'string' &&
+       value[0].trim().startsWith('[')
+     ) {
+       try {
+         const parsed = JSON.parse(value[0]);
+         return Array.isArray(parsed) ? parsed : [];
+       } catch (e) {
+         return value;
+       }
+     }
+     return value;
+   }
+
+   if (typeof value === 'string') {
+     const trimmed = value.trim();
+     if (!trimmed) return [];
+
+     if (trimmed.startsWith('[')) {
+       try {
+         const parsed = JSON.parse(trimmed);
+         return Array.isArray(parsed) ? parsed : [];
+       } catch (e) {
+         return [trimmed];
+       }
+     }
+
+     if (trimmed.includes(',')) {
+       return trimmed
+         .split(',')
+         .map((v) => v.trim())
+         .filter(Boolean);
+     }
+
+     return [trimmed];
+   }
+
+   return [];
+ };
+
 exports.createBlog = async (req, res) => {
   try {
     const { 
@@ -43,7 +89,7 @@ exports.createBlog = async (req, res) => {
       metaTitle: metaTitle || title,
       metaDescription: metaDescription || excerpt,
       metaKeywords: metaKeywords ? (Array.isArray(metaKeywords) ? metaKeywords : metaKeywords.split(',').map(k => k.trim())) : [],
-      relatedProducts: relatedProducts || [],
+      relatedProducts: normalizeRelatedProducts(relatedProducts) || [],
       readingTime,
       status: status || 'draft',
       publishedAt: status === 'published' ? new Date() : null
@@ -234,6 +280,8 @@ exports.updateBlog = async (req, res) => {
 
     const wasPublishing = blog.status !== 'published' && status === 'published';
 
+    const normalizedRelatedProducts = normalizeRelatedProducts(relatedProducts);
+
     blog = await Blog.findByIdAndUpdate(
       req.params.id,
       {
@@ -247,7 +295,7 @@ exports.updateBlog = async (req, res) => {
         metaTitle: metaTitle || blog.metaTitle,
         metaDescription: metaDescription || blog.metaDescription,
         metaKeywords: metaKeywords ? (Array.isArray(metaKeywords) ? metaKeywords : metaKeywords.split(',').map(k => k.trim())) : blog.metaKeywords,
-        relatedProducts: relatedProducts || blog.relatedProducts,
+        relatedProducts: normalizedRelatedProducts === undefined ? blog.relatedProducts : normalizedRelatedProducts,
         readingTime,
         status: status || blog.status,
         publishedAt: wasPublishing ? new Date() : blog.publishedAt

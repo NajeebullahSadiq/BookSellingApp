@@ -1,6 +1,7 @@
 const Message = require('../models/Message');
 const Conversation = require('../models/Conversation');
 const { createNotification } = require('./notificationController');
+const { getIO } = require('../utils/socket');
 
 exports.getMyConversations = async (req, res) => {
   try {
@@ -199,6 +200,11 @@ exports.sendMessage = async (req, res) => {
     const populatedMessage = await Message.findById(message._id)
       .populate('sender', 'name profileImage');
 
+    const populatedConversation = await Conversation.findById(conversation._id)
+      .populate('participants', 'name email profileImage role sellerProfile.storeName')
+      .populate('product', 'title previewImage price')
+      .populate('lastMessage');
+
     if (otherParticipant) {
       await createNotification(otherParticipant, {
         type: 'message',
@@ -208,11 +214,22 @@ exports.sendMessage = async (req, res) => {
       });
     }
 
+    const io = getIO();
+
+    io.to(`conversation:${conversation._id.toString()}`).emit('message:new', {
+      conversationId: conversation._id,
+      message: populatedMessage
+    });
+
+    populatedConversation.participants.forEach((p) => {
+      io.to(`user:${p._id.toString()}`).emit('conversation:upsert', populatedConversation);
+    });
+
     res.status(201).json({
       success: true,
       data: {
         message: populatedMessage,
-        conversation: conversation
+        conversation: populatedConversation
       }
     });
   } catch (error) {
@@ -257,6 +274,14 @@ exports.markMessagesAsRead = async (req, res) => {
 
     conversation.unreadCount.set(req.user._id.toString(), 0);
     await conversation.save();
+
+    const populatedConversation = await Conversation.findById(conversation._id)
+      .populate('participants', 'name email profileImage role sellerProfile.storeName')
+      .populate('product', 'title previewImage price')
+      .populate('lastMessage');
+
+    const io = getIO();
+    io.to(`user:${req.user._id.toString()}`).emit('conversation:upsert', populatedConversation);
 
     res.status(200).json({
       success: true,

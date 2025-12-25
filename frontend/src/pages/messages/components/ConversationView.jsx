@@ -4,7 +4,7 @@ import { messageAPI } from '../../../utils/api';
 import { toast } from 'react-toastify';
 import MessageInput from './MessageInput';
 
-const ConversationView = ({ conversation, onMessageSent }) => {
+const ConversationView = ({ conversation, onMessageSent, socket }) => {
   const { user } = useSelector((state) => state.auth);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +17,38 @@ const ConversationView = ({ conversation, onMessageSent }) => {
       markAsRead();
     }
   }, [conversation._id]);
+
+  useEffect(() => {
+    if (!socket || !conversation?._id) return;
+    socket.emit('join:conversation', conversation._id);
+
+    return () => {
+      socket.emit('leave:conversation', conversation._id);
+    };
+  }, [socket, conversation?._id]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleMessageNew = ({ conversationId, message }) => {
+      if (!conversationId || conversationId !== conversation?._id) return;
+
+      setMessages((prev) => {
+        if (prev.some((m) => m._id === message._id)) return prev;
+        return [...prev, message];
+      });
+
+      if (message?.sender?._id && message.sender._id !== user?._id) {
+        messageAPI.markAsRead(conversationId).catch(() => {});
+      }
+    };
+
+    socket.on('message:new', handleMessageNew);
+
+    return () => {
+      socket.off('message:new', handleMessageNew);
+    };
+  }, [socket, conversation?._id, user?._id]);
 
   useEffect(() => {
     scrollToBottom();
@@ -52,8 +84,13 @@ const ConversationView = ({ conversation, onMessageSent }) => {
         conversationId: conversation._id,
         content
       });
-      setMessages([...messages, data.data.message]);
-      onMessageSent();
+      if (!socket?.connected) {
+        setMessages((prev) => {
+          if (prev.some((m) => m._id === data.data.message?._id)) return prev;
+          return [...prev, data.data.message];
+        });
+      }
+      onMessageSent(data.data.conversation);
     } catch (error) {
       toast.error('Failed to send message');
       throw error;

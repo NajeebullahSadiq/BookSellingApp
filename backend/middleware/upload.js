@@ -2,9 +2,15 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+ const UPLOADS_ROOT = path.join(__dirname, '..', 'uploads');
+ const PRODUCTS_DIR = path.join(UPLOADS_ROOT, 'products');
+ const IMAGES_DIR = path.join(UPLOADS_ROOT, 'images');
+ const PROFILES_DIR = path.join(UPLOADS_ROOT, 'profiles');
+ const PREVIEWS_DIR = path.join(UPLOADS_ROOT, 'previews');
+
 // Create uploads directory if it doesn't exist
 const createUploadDirs = () => {
-  const dirs = ['./uploads/products', './uploads/images', './uploads/profiles', './uploads/previews'];
+  const dirs = [PRODUCTS_DIR, IMAGES_DIR, PROFILES_DIR, PREVIEWS_DIR];
   dirs.forEach(dir => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
@@ -17,7 +23,7 @@ createUploadDirs();
 // Storage configuration for product files
 const productStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, './uploads/products');
+    cb(null, PRODUCTS_DIR);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -28,7 +34,7 @@ const productStorage = multer.diskStorage({
 // Storage configuration for images
 const imageStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, './uploads/images');
+    cb(null, IMAGES_DIR);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -80,11 +86,11 @@ exports.uploadProductWithImage = multer({
   storage: multer.diskStorage({
     destination: function (req, file, cb) {
       if (file.fieldname === 'file') {
-        cb(null, './uploads/products');
+        cb(null, PRODUCTS_DIR);
       } else if (file.fieldname === 'previewImage') {
-        cb(null, './uploads/images');
+        cb(null, IMAGES_DIR);
       } else if (file.fieldname === 'previewPages') {
-        cb(null, './uploads/previews');
+        cb(null, PREVIEWS_DIR);
       }
     },
     filename: function (req, file, cb) {
