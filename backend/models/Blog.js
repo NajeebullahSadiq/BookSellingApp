@@ -79,7 +79,6 @@ const blogSchema = new mongoose.Schema({
 });
 
 blogSchema.index({ title: 'text', content: 'text', tags: 'text' });
-blogSchema.index({ slug: 1 });
 blogSchema.index({ status: 1, publishedAt: -1 });
 
 module.exports = mongoose.model('Blog', blogSchema);
