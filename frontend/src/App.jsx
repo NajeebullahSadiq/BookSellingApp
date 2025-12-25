@@ -21,6 +21,7 @@ import MyOrders from './pages/orders/MyOrders';
 import Wishlist from './pages/wishlist/Wishlist';
 import Notifications from './pages/notifications/Notifications';
 import Messages from './pages/messages/Messages';
+import DownloadHistory from './pages/downloads/DownloadHistory';
 
 // Seller Pages
 import SellerDashboard from './pages/seller/SellerDashboard';
@@ -61,6 +62,7 @@ function App() {
           {/* Protected Routes */}
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/orders" element={<PrivateRoute><MyOrders /></PrivateRoute>} />
+          <Route path="/download-history" element={<PrivateRoute><DownloadHistory /></PrivateRoute>} />
           <Route path="/wishlist" element={<PrivateRoute><Wishlist /></PrivateRoute>} />
           <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
           <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />

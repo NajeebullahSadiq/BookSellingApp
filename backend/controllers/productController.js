@@ -1,6 +1,7 @@
 const Product = require('../models/Product');
 const User = require('../models/User');
 const ViewHistory = require('../models/ViewHistory');
+const DownloadHistory = require('../models/DownloadHistory');
 const fs = require('fs');
 const path = require('path');
 
@@ -351,6 +352,36 @@ exports.downloadProduct = async (req, res) => {
     // Increment download count
     product.downloads += 1;
     await product.save();
+
+    try {
+      let orderId = null;
+      let sellerId = product.seller || null;
+
+      if (hasPurchased && hasPurchased._id) {
+        orderId = hasPurchased._id;
+        const matchingItem = (hasPurchased.items || []).find(
+          (i) => i.product && i.product.toString() === product._id.toString()
+        );
+        if (matchingItem && matchingItem.seller) {
+          sellerId = matchingItem.seller;
+        }
+      }
+
+      await DownloadHistory.create({
+        user: req.user._id,
+        product: product._id,
+        order: orderId,
+        seller: sellerId,
+        productTitle: product.title,
+        fileName: product.fileName,
+        fileType: product.fileType,
+        fileSize: product.fileSize,
+        ipAddress: req.ip || null,
+        userAgent: req.get('user-agent') || null,
+        downloadedAt: Date.now()
+      });
+    } catch (historyError) {
+    }
 
     res.download(filePath, product.fileName);
   } catch (error) {

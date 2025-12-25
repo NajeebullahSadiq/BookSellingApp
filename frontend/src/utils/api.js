@@ -108,6 +108,10 @@ export const messageAPI = {
   getUnreadCount: () => API.get('/messages/unread-count'),
 };
 
+export const downloadHistoryAPI = {
+  getMy: (params) => API.get('/download-history/my', { params }),
+};
+
 // Report APIs
 export const reportAPI = {
   create: (data) => API.post('/reports', data),

@@ -40,6 +40,7 @@ app.use('/api/messages', require('./routes/messageRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
 app.use('/api/recommendations', require('./routes/recommendationRoutes'));
 app.use('/api/blogs', require('./routes/blogRoutes'));
+app.use('/api/download-history', require('./routes/downloadHistoryRoutes'));
 
 // Health check
 app.get('/api/health', (req, res) => {
