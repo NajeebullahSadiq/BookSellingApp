@@ -14,6 +14,16 @@ const orderSchema = new mongoose.Schema({
     },
     title: String,
     price: Number,
+    sellerEarningAmount: {
+      type: Number,
+      default: null,
+      min: 0
+    },
+    adminCommissionAmount: {
+      type: Number,
+      default: null,
+      min: 0
+    },
     seller: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'

@@ -49,8 +49,8 @@ const AdminDashboard = () => {
           <p className="text-3xl font-bold text-red-600">{stats?.totalReports || 0}</p>
         </div>
         <div className="card">
-          <h3 className="text-gray-600 text-sm mb-1">Total Revenue</h3>
-          <p className="text-3xl font-bold text-yellow-600">${stats?.totalRevenue || 0}</p>
+          <h3 className="text-gray-600 text-sm mb-1">Platform Earnings</h3>
+          <p className="text-3xl font-bold text-yellow-600">${stats?.platformEarnings ?? ((stats?.totalRevenue || 0) * 0.3)}</p>
         </div>
       </div>
 

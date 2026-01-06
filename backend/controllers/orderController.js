@@ -6,6 +6,15 @@ const { createNotification } = require('./notificationController');
 // Initialize Stripe only if we're not in mock mode
 const stripe = process.env.USE_MOCK_PAYMENTS === 'true' ? null : Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock');
 
+const ADMIN_COMMISSION_RATE = 0.3;
+
+const calculateCommissionSplit = (price) => {
+  const safePrice = Number(price) || 0;
+  const adminCommissionAmount = Number((safePrice * ADMIN_COMMISSION_RATE).toFixed(2));
+  const sellerEarningAmount = Number((safePrice - adminCommissionAmount).toFixed(2));
+  return { sellerEarningAmount, adminCommissionAmount };
+};
+
 // @desc    Create Stripe Checkout Session (with mock payment option)
 // @route   POST /api/orders/create-checkout-session
 // @access  Private (Customer)
@@ -33,7 +42,17 @@ exports.createCheckoutSession = async (req, res) => {
       // Create a pending order
       const order = await Order.create({
         customer: req.user._id,
-        items: products.map(p => ({ product: p._id, title: p.title, price: p.price, seller: p.seller })),
+        items: products.map(p => {
+          const { sellerEarningAmount, adminCommissionAmount } = calculateCommissionSplit(p.price);
+          return {
+            product: p._id,
+            title: p.title,
+            price: p.price,
+            sellerEarningAmount,
+            adminCommissionAmount,
+            seller: p.seller
+          };
+        }),
         totalAmount: products.reduce((sum, p) => sum + p.price, 0),
         paymentStatus: 'completed', // Auto-complete payment in mock mode
         orderStatus: 'completed',
@@ -43,8 +62,9 @@ exports.createCheckoutSession = async (req, res) => {
 
       // Update seller stats and create notifications
       for (const item of order.items) {
+        const sellerEarningAmount = item.sellerEarningAmount ?? calculateCommissionSplit(item.price).sellerEarningAmount;
         await Product.findByIdAndUpdate(item.product, { $inc: { downloads: 0 } });
-        await User.findByIdAndUpdate(item.seller, { $inc: { 'sellerProfile.totalSales': 1, 'sellerProfile.earnings': item.price } });
+        await User.findByIdAndUpdate(item.seller, { $inc: { 'sellerProfile.totalSales': 1, 'sellerProfile.earnings': sellerEarningAmount } });
         
         await createNotification(item.seller, {
           type: 'order',
@@ -99,7 +119,17 @@ exports.createCheckoutSession = async (req, res) => {
       // Create a pending order
       const order = await Order.create({
         customer: req.user._id,
-        items: products.map(p => ({ product: p._id, title: p.title, price: p.price, seller: p.seller })),
+        items: products.map(p => {
+          const { sellerEarningAmount, adminCommissionAmount } = calculateCommissionSplit(p.price);
+          return {
+            product: p._id,
+            title: p.title,
+            price: p.price,
+            sellerEarningAmount,
+            adminCommissionAmount,
+            seller: p.seller
+          };
+        }),
         totalAmount: products.reduce((sum, p) => sum + p.price, 0),
         paymentStatus: 'pending',
         orderStatus: 'processing',
@@ -149,12 +179,21 @@ exports.stripeWebhook = async (req, res) => {
         order.paymentStatus = 'completed';
         order.orderStatus = 'completed';
         order.completedAt = new Date();
+        let updatedSplitAmounts = false;
         await order.save();
 
         // Increment seller stats and create notifications
         for (const item of order.items) {
+          if (item.sellerEarningAmount == null || item.adminCommissionAmount == null) {
+            const { sellerEarningAmount, adminCommissionAmount } = calculateCommissionSplit(item.price);
+            item.sellerEarningAmount = sellerEarningAmount;
+            item.adminCommissionAmount = adminCommissionAmount;
+            updatedSplitAmounts = true;
+          }
+
+          const sellerEarningAmount = item.sellerEarningAmount ?? calculateCommissionSplit(item.price).sellerEarningAmount;
           await Product.findByIdAndUpdate(item.product, { $inc: { downloads: 0 } });
-          await User.findByIdAndUpdate(item.seller, { $inc: { 'sellerProfile.totalSales': 1, 'sellerProfile.earnings': item.price } });
+          await User.findByIdAndUpdate(item.seller, { $inc: { 'sellerProfile.totalSales': 1, 'sellerProfile.earnings': sellerEarningAmount } });
           
           await createNotification(item.seller, {
             type: 'order',
@@ -164,6 +203,10 @@ exports.stripeWebhook = async (req, res) => {
             relatedProduct: item.product,
             relatedOrder: order._id
           });
+        }
+
+        if (updatedSplitAmounts) {
+          await order.save();
         }
 
         await createNotification(order.customer, {

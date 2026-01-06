@@ -19,7 +19,7 @@ exports.getSellerStats = async (req, res) => {
       order.items.forEach(item => {
         if (item.seller.toString() === sellerId.toString()) {
           totalSales += 1;
-          totalRevenue += item.price;
+          totalRevenue += item.sellerEarningAmount ?? (item.price * 0.7);
         }
       });
     });
@@ -96,7 +96,14 @@ exports.getRevenueTrends = async (req, res) => {
       {
         $group: {
           _id: groupBy,
-          revenue: { $sum: '$items.price' },
+          revenue: {
+            $sum: {
+              $ifNull: [
+                '$items.sellerEarningAmount',
+                { $multiply: ['$items.price', 0.7] }
+              ]
+            }
+          },
           sales: { $sum: 1 }
         }
       },
@@ -134,6 +141,7 @@ exports.getTopProducts = async (req, res) => {
     orders.forEach(order => {
       order.items.forEach(item => {
         if (item.seller.toString() === sellerId.toString()) {
+          const earningAmount = item.sellerEarningAmount ?? (item.price * 0.7);
           if (!productStats[item.product.toString()]) {
             productStats[item.product.toString()] = {
               productId: item.product,
@@ -143,7 +151,7 @@ exports.getTopProducts = async (req, res) => {
             };
           }
           productStats[item.product.toString()].sales += 1;
-          productStats[item.product.toString()].revenue += item.price;
+          productStats[item.product.toString()].revenue += earningAmount;
         }
       });
     });
@@ -200,12 +208,14 @@ exports.getRecentSales = async (req, res) => {
     orders.forEach(order => {
       order.items.forEach(item => {
         if (item.seller.toString() === sellerId.toString()) {
+          const earningAmount = item.sellerEarningAmount ?? (item.price * 0.7);
           sales.push({
             orderId: order._id,
             orderNumber: order.orderNumber,
             customer: order.customer,
             product: item.title,
             price: item.price,
+            earningAmount,
             date: order.createdAt
           });
         }

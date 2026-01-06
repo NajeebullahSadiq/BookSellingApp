@@ -176,6 +176,42 @@ exports.getDashboardStats = async (req, res) => {
       { $group: { _id: null, total: { $sum: '$totalAmount' } } }
     ]);
 
+    const platformEarnings = await Order.aggregate([
+      { $match: { paymentStatus: 'completed' } },
+      { $unwind: '$items' },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: {
+              $ifNull: [
+                '$items.adminCommissionAmount',
+                { $multiply: ['$items.price', 0.3] }
+              ]
+            }
+          }
+        }
+      }
+    ]);
+
+    const sellerPayouts = await Order.aggregate([
+      { $match: { paymentStatus: 'completed' } },
+      { $unwind: '$items' },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: {
+              $ifNull: [
+                '$items.sellerEarningAmount',
+                { $multiply: ['$items.price', 0.7] }
+              ]
+            }
+          }
+        }
+      }
+    ]);
+
     res.status(200).json({
       success: true,
       data: {
@@ -187,6 +223,8 @@ exports.getDashboardStats = async (req, res) => {
         totalOrders,
         completedOrders,
         totalRevenue: totalRevenue[0]?.total || 0,
+        platformEarnings: platformEarnings[0]?.total || 0,
+        sellerPayouts: sellerPayouts[0]?.total || 0,
         totalReports,
         pendingReports
       }
